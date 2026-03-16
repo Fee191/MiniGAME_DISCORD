@@ -266,6 +266,12 @@ export default function Game2Screen({ state, setState }: Game2ScreenProps) {
           <div className="h-8 w-px bg-white/20 mx-1 md:mx-2" />
 
           <button
+            onClick={() => setState(s => ({ ...s, view: 'config' }))}
+            className="bg-white/10 hover:bg-white/20 text-white px-4 py-3 rounded-xl text-sm font-bold transition flex items-center gap-2 border border-white/10"
+          >
+            Home
+          </button>
+          <button
             onClick={() => setConfirmDialog('reset')}
             className="bg-white/10 hover:bg-white/20 text-white p-2 md:px-4 md:py-3 rounded-xl text-sm font-bold transition flex items-center gap-2 border border-white/10"
             title="Restart Game"

@@ -8,6 +8,11 @@ import ConfigScreen from './components/ConfigScreen';
 import PrizeConfigScreen from './components/PrizeConfigScreen';
 import Game1Screen from './components/Game1Screen';
 import Game2Screen from './components/Game2Screen';
+import Game4Screen from './components/Game4Screen';
+import Game5Screen from './components/Game5Screen';
+import Game6Screen from './components/Game6Screen';
+import Game7Screen from './components/Game7Screen';
+import Game8Screen from './components/Game8Screen';
 import ResultScreen from './components/ResultScreen';
 import { AppState } from './types';
 
@@ -40,23 +45,18 @@ export default function App() {
 
       {/* Main Content Area */}
       <div className="relative z-10 w-full h-full flex flex-col">
-        {/* Persistent Header */}
-        {state.view !== 'config' && (
-          <header className="w-full py-4 px-6 flex items-center justify-center bg-black/30 backdrop-blur-sm border-bottom border-white/10">
-            <button 
-              onClick={() => setState(s => ({ ...s, view: 'config' }))}
-              className="text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full border border-white/20 hover:bg-white/10 transition-colors"
-            >
-              Home
-            </button>
-          </header>
-        )}
+        {/* Persistent Header - REMOVED */}
 
         <div className="flex-1 overflow-auto">
           {state.view === 'config' && <ConfigScreen state={state} setState={setState} />}
           {state.view === 'prizeConfig' && <PrizeConfigScreen state={state} setState={setState} />}
           {state.view === 'game1' && <Game1Screen state={state} setState={setState} />}
           {state.view === 'game2' && <Game2Screen state={state} setState={setState} />}
+          {state.view === 'game4' && <Game4Screen state={state} setState={setState} />}
+          {state.view === 'game5' && <Game5Screen state={state} setState={setState} />}
+          {state.view === 'game6' && <Game6Screen state={state} setState={setState} />}
+          {state.view === 'game7' && <Game7Screen state={state} setState={setState} />}
+          {state.view === 'game8' && <Game8Screen state={state} setState={setState} />}
           {state.view === 'result' && <ResultScreen state={state} setState={setState} />}
         </div>
       </div>

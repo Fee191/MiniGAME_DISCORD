@@ -15,7 +15,7 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
   
   const [phase, setPhase] = useState<'idle' | 'spinning_code' | 'tied' | 'spinning_tie' | 'revealed'>('idle');
   const [winner, setWinner] = useState<Player | null>(null);
-  const [displayText, setDisplayText] = useState<string>('????');
+  const [displayText, setDisplayText] = useState<string>('???');
   const [targetCode, setTargetCode] = useState<string>('');
   const [tiedPlayers, setTiedPlayers] = useState<Player[]>([]);
 
@@ -56,15 +56,15 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
 
     setPhase('spinning_code');
 
-    // Generate a random 4-digit number that exists in at least one player's ID
+    // Generate a random 3-digit number that exists in at least one player's ID
     let code = '';
     let tied: Player[] = [];
     let attempts = 0;
     
     while (tied.length === 0 && attempts < 10000) {
-      code = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+      code = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
       tied = remainingPlayers.filter(p => {
-        const pid = String(p.id).padStart(4, '0');
+        const pid = String(p.id).padStart(3, '0');
         return pid.includes(code) || code.includes(pid);
       });
       attempts++;
@@ -73,10 +73,10 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
     // Fallback if no match is found
     if (tied.length === 0) {
       const randomWinner = remainingPlayers[Math.floor(Math.random() * remainingPlayers.length)];
-      const str = String(randomWinner.id).padStart(4, '0');
-      code = str.length >= 4 ? str.slice(-4) : str;
+      const str = String(randomWinner.id).padStart(3, '0');
+      code = str.length >= 3 ? str.slice(-3) : str;
       tied = remainingPlayers.filter(p => {
-        const pid = String(p.id).padStart(4, '0');
+        const pid = String(p.id).padStart(3, '0');
         return pid.includes(code) || code.includes(pid);
       });
     }
@@ -84,14 +84,14 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
     setTargetCode(code);
     setTiedPlayers(tied);
 
-    // Spin effect: rapidly cycle 4 random digits
+    // Spin effect: rapidly cycle 3 random digits
     let ticks = 0;
     const maxTicks = 50; // 2.5 seconds at 50ms per tick
     
     const interval = setInterval(() => {
       ticks++;
       const chars = '0123456789';
-      const randomCode = Array(4).fill(0).map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
+      const randomCode = Array(3).fill(0).map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
       setDisplayText(randomCode);
 
       if (ticks >= maxTicks) {
@@ -105,27 +105,13 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
   const handleSpinTie = () => {
     if (phase !== 'tied') return;
 
-    if (tiedPlayers.length === 1) {
-      // Only 1 winner, reveal immediately
-      const winnerObj = tiedPlayers[0];
-      setWinner(winnerObj);
-      setDisplayText(winnerObj.id);
-      setPhase('revealed');
-      triggerConfetti();
-      
-      setState(s => ({
-        ...s,
-        winners: [...s.winners, { prize: currentPrize, player: winnerObj }]
-      }));
-      setRemainingPlayers(prev => prev.filter(p => p.id !== winnerObj.id));
-      return;
-    }
-
-    // Multiple tied players, spin among them
+    // Reveal the winner (either the only match or one picked from many)
     setPhase('spinning_tie');
 
-    const randomIndex = Math.floor(Math.random() * tiedPlayers.length);
-    const finalWinner = tiedPlayers[randomIndex];
+    const finalWinner = tiedPlayers.length === 1 
+      ? tiedPlayers[0] 
+      : tiedPlayers[Math.floor(Math.random() * tiedPlayers.length)];
+    
     setWinner(finalWinner);
 
     let ticks = 0;
@@ -133,7 +119,11 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
     
     const interval = setInterval(() => {
       ticks++;
-      const randomPlayer = tiedPlayers[Math.floor(Math.random() * tiedPlayers.length)];
+      // If multiple, cycle through them. If one, just "shake" or cycle random IDs to keep suspense
+      const randomPlayer = tiedPlayers.length > 1 
+        ? tiedPlayers[Math.floor(Math.random() * tiedPlayers.length)]
+        : remainingPlayers[Math.floor(Math.random() * remainingPlayers.length)];
+      
       setDisplayText(randomPlayer.id);
 
       if (ticks >= maxTicks) {
@@ -235,6 +225,12 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
 
       {/* Top Right Controls */}
       <div className="absolute top-6 right-6 flex items-center gap-3 z-20">
+        <button
+          onClick={() => setState(s => ({ ...s, view: 'config' }))}
+          className="bg-black/50 hover:bg-black/70 backdrop-blur-md text-white px-4 py-3 rounded-xl text-sm font-bold transition flex items-center gap-2 border border-white/20 shadow-lg"
+        >
+          Home
+        </button>
         <button
           onClick={() => setConfirmDialog('reset')}
           className="bg-black/50 hover:bg-black/70 backdrop-blur-md text-white px-4 py-3 rounded-xl text-sm font-bold transition flex items-center gap-2 border border-white/20 shadow-lg"

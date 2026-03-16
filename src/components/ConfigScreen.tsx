@@ -19,9 +19,38 @@ const AVAILABLE_GAMES = [
     name: 'Animal Race',
     description: 'Exciting race to determine the winner',
     color: 'from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500',
+  },
+  {
+    id: 'game4',
+    name: 'Battle Royale',
+    description: 'Survival of the luckiest on a shrinking grid',
+    color: 'from-red-500 to-orange-600 hover:from-red-400 hover:to-orange-500',
+  },
+  {
+    id: 'game5',
+    name: 'Tower Climb',
+    description: 'Race to the top of the tower',
+    color: 'from-indigo-500 to-blue-600 hover:from-indigo-400 hover:to-blue-500',
+  },
+  {
+    id: 'game6',
+    name: 'Glass Bridge',
+    description: 'Cross the bridge of luck',
+    color: 'from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500',
+  },
+  {
+    id: 'game7',
+    name: 'Mystery Boxes',
+    description: 'Pick the right box to survive',
+    color: 'from-pink-500 to-rose-600 hover:from-pink-400 hover:to-rose-500',
+  },
+  {
+    id: 'game8',
+    name: 'Space Race',
+    description: 'Launch to the moon first',
+    color: 'from-slate-700 to-slate-900 hover:from-slate-600 hover:to-slate-800',
   }
   // Add future games here easily:
-  // { id: 'game3', name: 'Mystery Box', description: 'Pick a box to reveal the prize', color: 'from-purple-500 to-pink-600 hover:from-purple-400 hover:to-pink-500' }
 ];
 
 export default function ConfigScreen({ state, setState }: ConfigScreenProps) {
