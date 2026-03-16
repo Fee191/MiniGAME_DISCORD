@@ -214,7 +214,7 @@ export default function Game2Screen({ state, setState }: Game2ScreenProps) {
           <Trophy className="w-10 h-10 text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]" />
           <div className="flex flex-col justify-center">
             <p className="text-[10px] md:text-xs text-blue-200 font-bold tracking-widest uppercase mb-0.5 opacity-80">
-              {state.eventName || 'Ghost Story: Love Destiny'}
+              {state.eventName}
             </p>
             <h2 className="text-xl md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-600 uppercase tracking-wider truncate max-w-xs md:max-w-md leading-none">
               {currentPrize.name}
