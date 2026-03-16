@@ -71,7 +71,7 @@ export default function Game2Screen({ state, setState }: Game2ScreenProps) {
 
   const updateRace = (time: number) => {
     if (!lastTimeRef.current) lastTimeRef.current = time;
-    const deltaTime = time - lastTimeRef.current;
+    const deltaTime = Math.min(time - lastTimeRef.current, 100); // Cap delta to avoid jumps
     lastTimeRef.current = time;
 
     let winner: Racer | null = null;
@@ -83,24 +83,26 @@ export default function Game2Screen({ state, setState }: Game2ScreenProps) {
       // Randomly switch states for suspense
       if (statusTimer <= 0) {
         const rand = Math.random();
-        if (rand < 0.15) { 
+        if (rand < 0.12) { 
           status = 'dashing'; 
-          statusTimer = Math.random() * 1500 + 1000; // Dash for 1-2.5s
-        } else if (rand < 0.30) { 
+          statusTimer = Math.random() * 2000 + 1000; // Dash for 1-3s
+        } else if (rand < 0.25) { 
           status = 'tired'; 
-          statusTimer = Math.random() * 1500 + 1000; // Tired for 1-2.5s
+          statusTimer = Math.random() * 2000 + 1000; // Tired for 1-3s
         } else { 
           status = 'normal'; 
-          statusTimer = Math.random() * 2000 + 1000; // Normal for 1-3s
+          statusTimer = Math.random() * 3000 + 1500; // Normal for 1.5-4.5s
         }
       }
 
       let speedMult = 1;
-      if (status === 'dashing') speedMult = 2.5;
-      if (status === 'tired') speedMult = 0.3;
+      if (status === 'dashing') speedMult = 2.2;
+      if (status === 'tired') speedMult = 0.4;
 
-      // Base speed to finish 100 units in ~30 seconds is 3.33 units/sec
-      const speed = speedMult * speedMultiplierRef.current * (deltaTime / 1000) * 3.33;
+      // Target 30 seconds for 100 units. Base speed = 100 / 30 = 3.33 units/sec
+      // Add a small organic variance per frame to make it look less robotic
+      const variance = 0.9 + (Math.random() * 0.2); 
+      const speed = speedMult * speedMultiplierRef.current * (deltaTime / 1000) * 3.33 * variance;
       const newProgress = Math.min(100, progress + speed);
       
       const updatedRacer = { ...racer, progress: newProgress, status, statusTimer };
@@ -332,8 +334,9 @@ export default function Game2Screen({ state, setState }: Game2ScreenProps) {
                   <div 
                     className="absolute top-1/2 -translate-y-1/2 flex items-center gap-2 md:gap-3" 
                     style={{ 
-                      left: `calc(${racer.progress}% * 0.92)`,
-                      transition: 'none' // Disable CSS transition for smooth JS animation
+                      left: `${racer.progress}%`,
+                      transform: 'translate(-100%, -50%)', // Anchor to the front of the animal
+                      transition: raceState === 'racing' ? 'none' : 'left 0.5s ease-out'
                     }}
                   >
                     <div className="relative">
