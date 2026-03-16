@@ -15,7 +15,7 @@ export default function App() {
   const [state, setState] = useState<AppState>({
     view: 'config',
     selectedGame: null,
-    eventName: 'Discord Ghost Story: Love Destiny',
+    eventName: '',
     bgImage: '',
     players: [],
     prizes: [],
@@ -51,9 +51,9 @@ export default function App() {
             />
             <div>
               <h1 className="text-lg md:text-xl font-black tracking-tighter text-white uppercase italic">
-                {state.eventName}
+                {state.eventName || 'Discord Ghost Story: Love Destiny'}
               </h1>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-purple-400 font-bold">Mini-game System</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-purple-400 font-bold">Mini-game System | Discord</p>
             </div>
           </div>
           

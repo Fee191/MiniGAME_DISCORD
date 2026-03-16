@@ -31,26 +31,35 @@ export default function ConfigScreen({ state, setState }: ConfigScreenProps) {
 
   const parsePlayers = (text: string) => {
     const lines = text.split(/[\r\n]+/).filter(line => line.trim());
-    return lines.map(line => {
-      // Handle Discord format: "LuckyPlayer - 3869604012 - A Ô" or "ID - Name"
-      if (line.includes(' - ')) {
-        const parts = line.split(' - ').map(p => p.trim());
-        if (parts.length >= 3) {
-          // Format: Prefix - ID - Name
-          return { id: parts[1], name: parts[2] };
-        } else if (parts.length === 2) {
-          // Format: ID - Name
+    const headerKeywords = ['ma_so', 'ten_kh', 'id', 'name', 'tên', 'mã số', 'stt'];
+    
+    return lines
+      .map(line => {
+        // Handle Discord format: "LuckyPlayer - 3869604012 - A Ô" or "ID - Name"
+        if (line.includes(' - ')) {
+          const parts = line.split(' - ').map(p => p.trim());
+          if (parts.length >= 3) {
+            // Format: Prefix - ID - Name
+            return { id: parts[1], name: parts[2] };
+          } else if (parts.length === 2) {
+            // Format: ID - Name
+            return { id: parts[0], name: parts[1] };
+          }
+        }
+        
+        // Fallback to splitting by tab, comma, or semicolon
+        const parts = line.split(/[\t,;]/).map(p => p.trim());
+        if (parts.length >= 2) {
           return { id: parts[0], name: parts[1] };
         }
-      }
-      
-      // Fallback to splitting by tab, comma, or semicolon
-      const parts = line.split(/[\t,;]/).map(p => p.trim());
-      if (parts.length >= 2) {
-        return { id: parts[0], name: parts[1] };
-      }
-      return { id: parts[0], name: parts[0] };
-    });
+        return { id: parts[0], name: parts[0] };
+      })
+      .filter(player => {
+        // Filter out header rows
+        const idLower = player.id.toLowerCase();
+        const nameLower = player.name.toLowerCase();
+        return !headerKeywords.some(keyword => idLower.includes(keyword) || nameLower.includes(keyword));
+      });
   };
 
   const handlePlayerInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
