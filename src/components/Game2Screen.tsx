@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Trophy, Flag, Play, FastForward, ArrowRight, RotateCcw, XSquare, AlertCircle } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { AppState, Prize } from '../types';
+import { AppState, Prize, Player } from '../types';
 import { ANIMALS } from '../utils';
 
 interface Game2ScreenProps {
@@ -20,7 +20,7 @@ interface Racer {
 
 export default function Game2Screen({ state, setState }: Game2ScreenProps) {
   const [currentPrizeIndex, setCurrentPrizeIndex] = useState(0);
-  const [remainingPlayers, setRemainingPlayers] = useState<string[]>([...state.players]);
+  const [remainingPlayers, setRemainingPlayers] = useState<Player[]>([...state.players]);
   const [racers, setRacers] = useState<Racer[]>([]);
   const [raceState, setRaceState] = useState<'idle' | 'racing' | 'finished'>('idle');
   const [speedMultiplier, setSpeedMultiplier] = useState(1);
@@ -46,8 +46,8 @@ export default function Game2Screen({ state, setState }: Game2ScreenProps) {
   useEffect(() => {
     if (raceState === 'idle' && !isFinished) {
       const shuffledAnimals = [...ANIMALS].sort(() => Math.random() - 0.5);
-      const initialRacers = remainingPlayers.map((id, index) => ({
-        id,
+      const initialRacers = remainingPlayers.map((player, index) => ({
+        id: player.id,
         animal: shuffledAnimals[index % shuffledAnimals.length],
         progress: 0,
         status: 'normal' as const,
@@ -128,12 +128,14 @@ export default function Game2Screen({ state, setState }: Game2ScreenProps) {
     if (requestRef.current) cancelAnimationFrame(requestRef.current);
     triggerConfetti();
 
+    const winnerPlayer = remainingPlayers.find(p => p.id === winner.id)!;
+
     // Update global state
     setState(s => ({
       ...s,
-      winners: [...s.winners, { prize: currentPrize, playerId: winner.id }]
+      winners: [...s.winners, { prize: currentPrize, player: winnerPlayer }]
     }));
-    setRemainingPlayers(prev => prev.filter(p => p !== winner.id));
+    setRemainingPlayers(prev => prev.filter(p => p.id !== winner.id));
   };
 
   const triggerConfetti = () => {
@@ -334,11 +336,16 @@ export default function Game2Screen({ state, setState }: Game2ScreenProps) {
                     
                     {/* Rank & ID Badge */}
                     <div className={`
-                      px-2 py-1 md:px-3 md:py-1.5 rounded-lg border font-mono font-bold whitespace-nowrap shadow-lg flex items-center gap-1 md:gap-2
+                      px-2 py-1 md:px-3 md:py-1.5 rounded-lg border font-mono font-bold whitespace-nowrap shadow-lg flex flex-col leading-tight
                       ${index === 0 ? 'bg-yellow-500 text-black border-yellow-400' : 'bg-black/80 text-white border-white/20'}
                     `}>
-                      <span className={index === 0 ? 'text-black' : 'text-white/50'}>#{index + 1}</span>
-                      <span className="text-xs md:text-sm max-w-[80px] md:max-w-[120px] truncate">{racer.id}</span>
+                      <div className="flex items-center gap-1 md:gap-2">
+                        <span className={index === 0 ? 'text-black' : 'text-white/50'}>#{index + 1}</span>
+                        <span className="text-xs md:text-sm max-w-[80px] md:max-w-[120px] truncate">{racer.id}</span>
+                      </div>
+                      <span className={`text-[10px] md:text-xs truncate max-w-[80px] md:max-w-[120px] ${index === 0 ? 'text-black/70' : 'text-white/60'}`}>
+                        {state.players.find(p => p.id === racer.id)?.name || racer.id}
+                      </span>
                     </div>
                   </div>
                 </motion.div>
@@ -373,6 +380,9 @@ export default function Game2Screen({ state, setState }: Game2ScreenProps) {
                   <div className="flex-1 min-w-0">
                     <p className={`font-mono font-bold text-xs md:text-sm truncate ${index === 0 ? 'text-yellow-400' : 'text-white'}`}>
                       {racer.id}
+                    </p>
+                    <p className="text-[10px] md:text-xs text-white/50 truncate">
+                      {state.players.find(p => p.id === racer.id)?.name || racer.id}
                     </p>
                     <div className="w-full bg-black/50 h-1.5 rounded-full mt-1 overflow-hidden">
                       <div 
@@ -421,8 +431,11 @@ export default function Game2Screen({ state, setState }: Game2ScreenProps) {
               </p>
 
               <div className="bg-white/5 border border-white/10 rounded-2xl p-4 md:p-6 inline-block min-w-[250px] md:min-w-[300px]">
-                <p className="text-xs md:text-sm text-white/40 uppercase tracking-widest mb-2 font-bold">PLAYER ID</p>
+                <p className="text-xs md:text-sm text-white/40 uppercase tracking-widest mb-2 font-bold">WINNER</p>
                 <p className="text-3xl md:text-4xl font-mono font-black text-white tracking-wider truncate">{currentWinner.id}</p>
+                <p className="text-xl md:text-2xl font-bold text-yellow-400 truncate mt-1">
+                  {state.players.find(p => p.id === currentWinner.id)?.name || currentWinner.id}
+                </p>
               </div>
 
               <div className="mt-8 md:mt-10">
