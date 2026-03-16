@@ -324,8 +324,11 @@ export default function Game2Screen({ state, setState }: Game2ScreenProps) {
                 >
                   {/* Progress Trail */}
                   <div 
-                    className="absolute left-0 top-1/2 -translate-y-1/2 h-2 bg-gradient-to-r from-yellow-500/0 to-yellow-500/50 rounded-full transition-all duration-100 ease-linear" 
-                    style={{ width: `calc(${racer.progress}% * 0.92)` }} 
+                    className="absolute left-0 top-1/2 -translate-y-1/2 h-2 bg-gradient-to-r from-yellow-500/0 to-yellow-500/50 rounded-full" 
+                    style={{ 
+                      width: `${racer.progress}%`,
+                      transition: raceState === 'racing' ? 'none' : 'width 0.5s ease-out'
+                    }} 
                   />
                   
                   {/* Animal Container */}
