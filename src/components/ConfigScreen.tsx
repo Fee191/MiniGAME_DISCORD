@@ -25,13 +25,37 @@ const AVAILABLE_GAMES = [
 ];
 
 export default function ConfigScreen({ state, setState }: ConfigScreenProps) {
-  const [playerInput, setPlayerInput] = useState(state.players.join('\n'));
+  const [playerInput, setPlayerInput] = useState(state.players.map(p => `${p.id}${p.name !== p.id ? `\t${p.name}` : ''}`).join('\n'));
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bgInputRef = useRef<HTMLInputElement>(null);
 
+  const parsePlayers = (text: string) => {
+    const lines = text.split(/[\r\n]+/).filter(line => line.trim());
+    return lines.map(line => {
+      // Handle Discord format: "LuckyPlayer - 3869604012 - A Ô" or "ID - Name"
+      if (line.includes(' - ')) {
+        const parts = line.split(' - ').map(p => p.trim());
+        if (parts.length >= 3) {
+          // Format: Prefix - ID - Name
+          return { id: parts[1], name: parts[2] };
+        } else if (parts.length === 2) {
+          // Format: ID - Name
+          return { id: parts[0], name: parts[1] };
+        }
+      }
+      
+      // Fallback to splitting by tab, comma, or semicolon
+      const parts = line.split(/[\t,;]/).map(p => p.trim());
+      if (parts.length >= 2) {
+        return { id: parts[0], name: parts[1] };
+      }
+      return { id: parts[0], name: parts[0] };
+    });
+  };
+
   const handlePlayerInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setPlayerInput(e.target.value);
-    const players = e.target.value.split('\n').map(p => p.trim()).filter(p => p);
+    const players = parsePlayers(e.target.value);
     setState(s => ({ ...s, players }));
   };
 
@@ -42,8 +66,8 @@ export default function ConfigScreen({ state, setState }: ConfigScreenProps) {
     const reader = new FileReader();
     reader.onload = (event) => {
       const text = event.target?.result as string;
-      const players = text.split(/[\r\n,]+/).map(p => p.trim()).filter(p => p);
-      setPlayerInput(players.join('\n'));
+      const players = parsePlayers(text);
+      setPlayerInput(players.map(p => `${p.id}\t${p.name}`).join('\n'));
       setState(s => ({ ...s, players }));
     };
     reader.readAsText(file);
