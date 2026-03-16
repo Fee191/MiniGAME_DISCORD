@@ -280,14 +280,12 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
           
           {/* Event Name */}
           <div className="flex flex-col items-center mb-4 md:mb-8 w-full px-2 md:px-4 mt-2">
-            {state.eventName && (
-              <h1 
-                className="text-4xl md:text-5xl lg:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 via-yellow-400 to-yellow-600 uppercase tracking-widest drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] leading-tight md:leading-tight max-w-full text-center"
-                style={{ textWrap: 'balance' }}
-              >
-                {state.eventName}
-              </h1>
-            )}
+            <h1 
+              className="text-4xl md:text-5xl lg:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 via-yellow-400 to-yellow-600 uppercase tracking-widest drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] leading-tight md:leading-tight max-w-full text-center"
+              style={{ textWrap: 'balance' }}
+            >
+              {state.eventName || 'Ghost Story: Love Destiny'}
+            </h1>
             <div className="mt-6 bg-slate-900/80 backdrop-blur-md px-6 py-2 rounded-full border border-white/10 shadow-[0_0_20px_rgba(0,0,0,0.5)]">
               <p className="text-sm md:text-base text-blue-200 font-bold tracking-wider uppercase">
                 Remaining Players: <span className="text-white text-lg">{remainingPlayers.length}</span>
