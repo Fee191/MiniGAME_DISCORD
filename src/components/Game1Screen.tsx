@@ -63,16 +63,22 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
     
     while (tied.length === 0 && attempts < 10000) {
       code = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-      tied = remainingPlayers.filter(p => String(p.id).includes(code));
+      tied = remainingPlayers.filter(p => {
+        const pid = String(p.id).padStart(4, '0');
+        return pid.includes(code) || code.includes(pid);
+      });
       attempts++;
     }
 
-    // Fallback if no 4-digit match is found (very rare, but possible if IDs are short)
+    // Fallback if no match is found
     if (tied.length === 0) {
       const randomWinner = remainingPlayers[Math.floor(Math.random() * remainingPlayers.length)];
-      const str = String(randomWinner.id);
-      code = str.length >= 4 ? str.slice(-4) : str.padStart(4, '0');
-      tied = remainingPlayers.filter(p => String(p.id).includes(code));
+      const str = String(randomWinner.id).padStart(4, '0');
+      code = str.length >= 4 ? str.slice(-4) : str;
+      tied = remainingPlayers.filter(p => {
+        const pid = String(p.id).padStart(4, '0');
+        return pid.includes(code) || code.includes(pid);
+      });
     }
     
     setTargetCode(code);
@@ -353,10 +359,10 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
                   <div className="text-6xl md:text-7xl font-black tracking-widest text-white drop-shadow-lg font-mono">
                     {targetCode}
                   </div>
-                  {tiedPlayers.length > 1 && (
-                    <div className="mt-4 flex flex-wrap justify-center gap-2 w-full max-w-xl mx-auto p-2 max-h-[100px] overflow-y-auto custom-scrollbar relative z-30">
+                  {tiedPlayers.length > 0 && (
+                    <div className="mt-4 flex flex-wrap justify-center gap-2 w-full max-w-xl mx-auto p-2 max-h-[150px] overflow-y-auto custom-scrollbar relative z-30">
                       {tiedPlayers.map(p => (
-                        <span key={p.id} className="bg-slate-800 border border-emerald-500/30 px-3 py-1 rounded-lg text-emerald-300 font-mono font-bold text-sm">
+                        <span key={p.id} className="bg-slate-800/90 border border-emerald-500/50 px-3 py-2 rounded-lg text-emerald-300 font-mono font-bold text-sm shadow-lg">
                           {p.id} - {p.name}
                         </span>
                       ))}
