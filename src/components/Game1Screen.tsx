@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Trophy, ArrowRight, RotateCcw, XSquare, Ticket, Star, AlertCircle } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { AppState } from '../types';
+import { AppState, Player } from '../types';
 
 interface Game1ScreenProps {
   state: AppState;
@@ -11,13 +11,13 @@ interface Game1ScreenProps {
 
 export default function Game1Screen({ state, setState }: Game1ScreenProps) {
   const [currentPrizeIndex, setCurrentPrizeIndex] = useState(0);
-  const [remainingPlayers, setRemainingPlayers] = useState<string[]>([...state.players]);
+  const [remainingPlayers, setRemainingPlayers] = useState<Player[]>([...state.players]);
   
   const [phase, setPhase] = useState<'idle' | 'spinning_code' | 'tied' | 'spinning_tie' | 'revealed'>('idle');
-  const [winnerId, setWinnerId] = useState<string | null>(null);
+  const [winner, setWinner] = useState<Player | null>(null);
   const [displayText, setDisplayText] = useState<string>('????');
   const [targetCode, setTargetCode] = useState<string>('');
-  const [tiedPlayers, setTiedPlayers] = useState<string[]>([]);
+  const [tiedPlayers, setTiedPlayers] = useState<Player[]>([]);
 
   const [confirmDialog, setConfirmDialog] = useState<'reset' | 'stop' | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -58,21 +58,21 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
 
     // Generate a random 4-digit number that exists in at least one player's ID
     let code = '';
-    let tied: string[] = [];
+    let tied: Player[] = [];
     let attempts = 0;
     
     while (tied.length === 0 && attempts < 10000) {
       code = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-      tied = remainingPlayers.filter(p => String(p).includes(code));
+      tied = remainingPlayers.filter(p => String(p.id).includes(code));
       attempts++;
     }
 
     // Fallback if no 4-digit match is found (very rare, but possible if IDs are short)
     if (tied.length === 0) {
       const randomWinner = remainingPlayers[Math.floor(Math.random() * remainingPlayers.length)];
-      const str = String(randomWinner);
+      const str = String(randomWinner.id);
       code = str.length >= 4 ? str.slice(-4) : str.padStart(4, '0');
-      tied = remainingPlayers.filter(p => String(p).includes(code));
+      tied = remainingPlayers.filter(p => String(p.id).includes(code));
     }
     
     setTargetCode(code);
@@ -101,17 +101,17 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
 
     if (tiedPlayers.length === 1) {
       // Only 1 winner, reveal immediately
-      const winner = tiedPlayers[0];
-      setWinnerId(winner);
-      setDisplayText(winner);
+      const winnerObj = tiedPlayers[0];
+      setWinner(winnerObj);
+      setDisplayText(winnerObj.id);
       setPhase('revealed');
       triggerConfetti();
       
       setState(s => ({
         ...s,
-        winners: [...s.winners, { prize: currentPrize, playerId: winner }]
+        winners: [...s.winners, { prize: currentPrize, player: winnerObj }]
       }));
-      setRemainingPlayers(prev => prev.filter(p => p !== winner));
+      setRemainingPlayers(prev => prev.filter(p => p.id !== winnerObj.id));
       return;
     }
 
@@ -120,7 +120,7 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
 
     const randomIndex = Math.floor(Math.random() * tiedPlayers.length);
     const finalWinner = tiedPlayers[randomIndex];
-    setWinnerId(finalWinner);
+    setWinner(finalWinner);
 
     let ticks = 0;
     const maxTicks = 50;
@@ -128,19 +128,19 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
     const interval = setInterval(() => {
       ticks++;
       const randomPlayer = tiedPlayers[Math.floor(Math.random() * tiedPlayers.length)];
-      setDisplayText(randomPlayer);
+      setDisplayText(randomPlayer.id);
 
       if (ticks >= maxTicks) {
         clearInterval(interval);
-        setDisplayText(finalWinner);
+        setDisplayText(finalWinner.id);
         setPhase('revealed');
         triggerConfetti();
         
         setState(s => ({
           ...s,
-          winners: [...s.winners, { prize: currentPrize, playerId: finalWinner }]
+          winners: [...s.winners, { prize: currentPrize, player: finalWinner }]
         }));
-        setRemainingPlayers(prev => prev.filter(p => p !== finalWinner));
+        setRemainingPlayers(prev => prev.filter(p => p.id !== finalWinner.id));
       }
     }, 50);
   };
@@ -175,7 +175,7 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
   const nextPrize = () => {
     setCurrentPrizeIndex(prev => prev + 1);
     setPhase('idle');
-    setWinnerId(null);
+    setWinner(null);
     setDisplayText('????');
     setTargetCode('');
     setTiedPlayers([]);
@@ -356,8 +356,8 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
                   {tiedPlayers.length > 1 && (
                     <div className="mt-4 flex flex-wrap justify-center gap-2 w-full max-w-xl mx-auto p-2 max-h-[100px] overflow-y-auto custom-scrollbar relative z-30">
                       {tiedPlayers.map(p => (
-                        <span key={p} className="bg-slate-800 border border-emerald-500/30 px-3 py-1 rounded-lg text-emerald-300 font-mono font-bold text-sm">
-                          {p}
+                        <span key={p.id} className="bg-slate-800 border border-emerald-500/30 px-3 py-1 rounded-lg text-emerald-300 font-mono font-bold text-sm">
+                          {p.id} - {p.name}
                         </span>
                       ))}
                     </div>
@@ -376,13 +376,16 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
                 </div>
               )}
 
-              {phase === 'revealed' && (
+              {phase === 'revealed' && winner && (
                 <div className="space-y-2">
                   <p className="font-bold text-sm tracking-widest uppercase text-emerald-300">
                     WINNER
                   </p>
                   <div className="text-4xl md:text-5xl font-black tracking-wider text-white drop-shadow-lg truncate px-4 font-mono">
-                    {displayText}
+                    {winner.id}
+                  </div>
+                  <div className="text-2xl md:text-3xl font-bold text-yellow-400 drop-shadow-md truncate px-4">
+                    {winner.name}
                   </div>
                 </div>
               )}
@@ -458,7 +461,7 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
               ) : (
                 state.winners.map((winner, idx) => (
                   <motion.div 
-                    key={winner.playerId + idx}
+                    key={winner.player.id + idx}
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     className="bg-white/5 border border-white/10 rounded-lg p-3 flex flex-col gap-1"
@@ -466,7 +469,8 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
                     <div className="flex items-center justify-between">
                       <span className="text-blue-300 font-semibold text-xs">{winner.prize.name}</span>
                     </div>
-                    <span className="text-white font-mono font-bold text-base truncate">{winner.playerId}</span>
+                    <span className="text-white font-mono font-bold text-base truncate">{winner.player.id}</span>
+                    <span className="text-white/60 text-xs truncate">{winner.player.name}</span>
                   </motion.div>
                 ))
               )}

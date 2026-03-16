@@ -86,7 +86,7 @@ export default function Game2Screen({ state, setState }: Game2ScreenProps) {
         if (rand < 0.15) { 
           status = 'dashing'; 
           statusTimer = Math.random() * 1500 + 1000; // Dash for 1-2.5s
-        } else if (rand < 0.15) { 
+        } else if (rand < 0.30) { 
           status = 'tired'; 
           statusTimer = Math.random() * 1500 + 1000; // Tired for 1-2.5s
         } else { 
@@ -184,6 +184,15 @@ export default function Game2Screen({ state, setState }: Game2ScreenProps) {
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
     };
   }, []);
+
+  // Pre-map player names for performance
+  const playerMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    state.players.forEach(p => {
+      map[p.id] = p.name;
+    });
+    return map;
+  }, [state.players]);
 
   // Sort racers for display: highest progress first
   const sortedRacers = useMemo(() => {
@@ -321,8 +330,11 @@ export default function Game2Screen({ state, setState }: Game2ScreenProps) {
                   
                   {/* Animal Container */}
                   <div 
-                    className="absolute top-1/2 -translate-y-1/2 flex items-center gap-2 md:gap-3 transition-all duration-100 ease-linear" 
-                    style={{ left: `calc(${racer.progress}% * 0.92)` }}
+                    className="absolute top-1/2 -translate-y-1/2 flex items-center gap-2 md:gap-3" 
+                    style={{ 
+                      left: `calc(${racer.progress}% * 0.92)`,
+                      transition: 'none' // Disable CSS transition for smooth JS animation
+                    }}
                   >
                     <div className="relative">
                       <span className="text-4xl md:text-5xl drop-shadow-[0_5px_10px_rgba(0,0,0,0.8)] filter">{racer.animal}</span>
@@ -344,7 +356,7 @@ export default function Game2Screen({ state, setState }: Game2ScreenProps) {
                         <span className="text-xs md:text-sm max-w-[80px] md:max-w-[120px] truncate">{racer.id}</span>
                       </div>
                       <span className={`text-[10px] md:text-xs truncate max-w-[80px] md:max-w-[120px] ${index === 0 ? 'text-black/70' : 'text-white/60'}`}>
-                        {state.players.find(p => p.id === racer.id)?.name || racer.id}
+                        {playerMap[racer.id] || racer.id}
                       </span>
                     </div>
                   </div>
@@ -382,12 +394,12 @@ export default function Game2Screen({ state, setState }: Game2ScreenProps) {
                       {racer.id}
                     </p>
                     <p className="text-[10px] md:text-xs text-white/50 truncate">
-                      {state.players.find(p => p.id === racer.id)?.name || racer.id}
+                      {playerMap[racer.id] || racer.id}
                     </p>
                     <div className="w-full bg-black/50 h-1.5 rounded-full mt-1 overflow-hidden">
                       <div 
                         className={`h-full rounded-full ${index === 0 ? 'bg-yellow-400' : 'bg-white/30'}`} 
-                        style={{ width: `${racer.progress}%` }} 
+                        style={{ width: `${racer.progress}%`, transition: 'width 0.1s linear' }} 
                       />
                     </div>
                   </div>
@@ -434,7 +446,7 @@ export default function Game2Screen({ state, setState }: Game2ScreenProps) {
                 <p className="text-xs md:text-sm text-white/40 uppercase tracking-widest mb-2 font-bold">WINNER</p>
                 <p className="text-3xl md:text-4xl font-mono font-black text-white tracking-wider truncate">{currentWinner.id}</p>
                 <p className="text-xl md:text-2xl font-bold text-yellow-400 truncate mt-1">
-                  {state.players.find(p => p.id === currentWinner.id)?.name || currentWinner.id}
+                  {playerMap[currentWinner.id] || currentWinner.id}
                 </p>
               </div>
 

@@ -4,9 +4,14 @@ export interface Prize {
   content: string;
 }
 
+export interface Player {
+  id: string;
+  name: string;
+}
+
 export interface Winner {
   prize: Prize;
-  playerId: string;
+  player: Player;
 }
 
 export interface AppState {
@@ -14,7 +19,7 @@ export interface AppState {
   selectedGame: string | null;
   eventName: string;
   bgImage: string;
-  players: string[];
+  players: Player[];
   prizes: Prize[];
   winners: Winner[];
 }

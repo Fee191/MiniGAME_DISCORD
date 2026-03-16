@@ -15,8 +15,8 @@ export default function ResultScreen({ state, setState }: ResultScreenProps) {
 
   const handleDownload = () => {
     const csvContent = "data:text/csv;charset=utf-8," 
-      + "Prize,Content,Winner ID\n"
-      + state.winners.map(w => `${w.prize.name},${w.prize.content},${w.playerId}`).join("\n");
+      + "Prize,Content,Winner ID,Winner Name\n"
+      + state.winners.map(w => `${w.prize.name},${w.prize.content},${w.player.id},${w.player.name}`).join("\n");
     
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
@@ -44,7 +44,7 @@ export default function ResultScreen({ state, setState }: ResultScreenProps) {
       <div className="w-full max-w-4xl grid gap-6">
         {state.winners.map((winner, index) => (
           <motion.div
-            key={winner.playerId + index}
+            key={winner.player.id + index}
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: index * 0.1 }}
@@ -61,8 +61,9 @@ export default function ResultScreen({ state, setState }: ResultScreenProps) {
             </div>
 
             <div className="bg-black/40 px-8 py-4 rounded-xl border border-white/10 text-center min-w-[250px]">
-              <p className="text-sm text-white/40 uppercase tracking-widest mb-1 font-bold">Winner ID</p>
-              <p className="text-4xl font-mono font-black text-white tracking-wider">{winner.playerId}</p>
+              <p className="text-sm text-white/40 uppercase tracking-widest mb-1 font-bold">Winner</p>
+              <p className="text-4xl font-mono font-black text-white tracking-wider">{winner.player.id}</p>
+              <p className="text-xl font-bold text-yellow-400 mt-1">{winner.player.name}</p>
             </div>
           </motion.div>
         ))}
