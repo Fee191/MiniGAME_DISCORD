@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'motion/react';
-import { Trophy, Target, RotateCcw, XSquare, AlertCircle, Users, Crosshair, Play, Pause, Skull, Zap, Trees, Cloud, Sun, ShieldAlert, UserCheck, UserMinus } from 'lucide-react';
+import { Trophy, Target, RotateCcw, XSquare, AlertCircle, Users, Crosshair, Play, Pause, Skull, Zap, Trees, Cloud, Sun, ShieldAlert, UserCheck, UserMinus, CheckCircle } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { AppState, Player } from '../types';
 
@@ -320,7 +320,7 @@ export default function Game9Screen({ state, setState }: Game9ScreenProps) {
             setPhase('camp');
             setActiveTeamId(null);
             setFiringSquadPlayers([]);
-          }, 3000);
+          }, 5000);
         }
       }
     }
@@ -346,7 +346,7 @@ export default function Game9Screen({ state, setState }: Game9ScreenProps) {
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col p-4 md:p-6 text-zinc-900 overflow-hidden relative bg-stone-200">
+    <div className="h-screen w-screen flex flex-col p-2 md:p-4 text-zinc-900 overflow-hidden relative bg-stone-200">
       {/* Prison Camp Background */}
       <div className="absolute inset-0 z-0 opacity-40 pointer-events-none overflow-hidden">
         {/* Brick Floor Pattern */}
@@ -361,13 +361,13 @@ export default function Game9Screen({ state, setState }: Game9ScreenProps) {
       </div>
 
       {/* Header */}
-      <div className="relative z-10 flex justify-between items-center mb-6 bg-white/80 backdrop-blur-md p-5 rounded-2xl border border-stone-300 shadow-xl">
+      <div className="relative z-10 flex justify-between items-center mb-3 bg-white/80 backdrop-blur-md p-3 rounded-2xl border border-stone-300 shadow-xl">
         <div className="flex items-center gap-4">
-          <div className="p-3 bg-stone-200 rounded-xl">
-            <ShieldAlert className="w-8 h-8 text-red-600" />
+          <div className="p-2 bg-stone-200 rounded-xl">
+            <ShieldAlert className="w-6 h-6 text-red-600" />
           </div>
           <div>
-            <h2 className="text-2xl font-black uppercase tracking-tighter text-stone-900">
+            <h2 className="text-xl font-black uppercase tracking-tighter text-stone-900">
               PRISON <span className="text-red-600">CAMP</span> ELIMINATION
             </h2>
             <div className="flex gap-4 text-[10px] font-bold text-stone-500 uppercase tracking-widest">
@@ -380,12 +380,12 @@ export default function Game9Screen({ state, setState }: Game9ScreenProps) {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsAutoPlaying(!isAutoPlaying)}
-            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-black uppercase tracking-widest transition-all text-white ${isAutoPlaying ? 'bg-red-600 hover:bg-red-500' : 'bg-emerald-600 hover:bg-emerald-500'}`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-black uppercase tracking-widest transition-all text-white ${isAutoPlaying ? 'bg-red-600 hover:bg-red-500' : 'bg-emerald-600 hover:bg-emerald-500'}`}
           >
-            {isAutoPlaying ? <><Pause className="w-5 h-5" /> PAUSE</> : <><Play className="w-5 h-5" /> AUTO MODE</>}
+            {isAutoPlaying ? <><Pause className="w-4 h-4" /> PAUSE</> : <><Play className="w-4 h-4" /> AUTO MODE</>}
           </button>
-          <button onClick={() => setConfirmDialog('reset')} className="bg-stone-200 p-3 rounded-xl hover:bg-stone-300 transition text-stone-700"><RotateCcw className="w-5 h-5" /></button>
-          <button onClick={() => setConfirmDialog('stop')} className="bg-red-100 text-red-600 p-3 rounded-xl hover:bg-red-200 transition border border-red-200"><XSquare className="w-5 h-5" /></button>
+          <button onClick={() => setConfirmDialog('reset')} className="bg-stone-200 p-2 rounded-xl hover:bg-stone-300 transition text-stone-700"><RotateCcw className="w-4 h-4" /></button>
+          <button onClick={() => setConfirmDialog('stop')} className="bg-red-100 text-red-600 p-2 rounded-xl hover:bg-red-200 transition border border-red-200"><XSquare className="w-4 h-4" /></button>
         </div>
       </div>
 
@@ -394,7 +394,7 @@ export default function Game9Screen({ state, setState }: Game9ScreenProps) {
         
         {/* PHASE: CAMP / SELECTING / DRAGGING */}
         {phase === 'camp' || phase === 'selecting' || phase === 'dragging' ? (
-          <div className="w-full h-full relative p-8">
+          <div className="w-full h-full relative p-4">
             <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-white/90 px-4 py-1 rounded-full text-[10px] font-bold text-stone-600 uppercase tracking-[0.3em] border border-stone-300 shadow-sm z-10">
               Concentration Area
             </div>
@@ -430,7 +430,7 @@ export default function Game9Screen({ state, setState }: Game9ScreenProps) {
             >
               <div className="relative">
                 <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-red-600 text-white text-[8px] font-black px-2 py-0.5 rounded uppercase whitespace-nowrap shadow-lg">MONSTER</div>
-                <MonsterFigure size={60} />
+                <MonsterFigure size={80} />
               </div>
             </motion.div>
 
@@ -502,7 +502,7 @@ export default function Game9Screen({ state, setState }: Game9ScreenProps) {
                         zIndex: i 
                       }}
                     >
-                      <StickFigure color="#52525b" size={25} id={p.id} isScrambling={true} />
+                      <StickFigure color="#52525b" size={35} id={p.id} isScrambling={true} />
                     </div>
                   ))}
                 </div>
@@ -522,12 +522,21 @@ export default function Game9Screen({ state, setState }: Game9ScreenProps) {
 
             {phase === 'camp' && !isAutoPlaying && (
               <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-50">
-                <button 
-                  onClick={selectTeam}
-                  className="bg-stone-900 text-white font-black px-12 py-4 rounded-2xl hover:bg-stone-800 transition-all uppercase tracking-widest shadow-2xl flex items-center gap-3"
-                >
-                  <Target className="w-6 h-6" /> SELECT NEXT TEAM
-                </button>
+                {state.winners.length >= state.prizes.length ? (
+                  <button 
+                    onClick={() => setState(s => ({ ...s, view: 'result' }))}
+                    className="bg-blue-600 text-white font-black px-12 py-4 rounded-2xl hover:bg-blue-500 transition-all uppercase tracking-widest shadow-2xl flex items-center gap-3"
+                  >
+                    <CheckCircle className="w-6 h-6" /> FINISH GAME
+                  </button>
+                ) : (
+                  <button 
+                    onClick={selectTeam}
+                    className="bg-stone-900 text-white font-black px-12 py-4 rounded-2xl hover:bg-stone-800 transition-all uppercase tracking-widest shadow-2xl flex items-center gap-3"
+                  >
+                    <Target className="w-6 h-6" /> SELECT NEXT TEAM
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -618,18 +627,27 @@ export default function Game9Screen({ state, setState }: Game9ScreenProps) {
               </div>
             )}
 
-            {phase === 'winner' && !isAutoPlaying && state.winners.length < state.prizes.length && (
+            {phase === 'winner' && !isAutoPlaying && (
               <div className="mt-24">
-                <button 
-                  onClick={() => {
-                    setPhase('camp');
-                    setActiveTeamId(null);
-                    setFiringSquadPlayers([]);
-                  }}
-                  className="bg-emerald-600 text-white font-black px-16 py-5 rounded-2xl hover:bg-emerald-500 transition-all uppercase tracking-widest shadow-2xl flex items-center gap-3"
-                >
-                  <Play className="w-6 h-6" /> CONTINUE TO NEXT TEAM
-                </button>
+                {state.winners.length >= state.prizes.length ? (
+                  <button 
+                    onClick={() => setState(s => ({ ...s, view: 'result' }))}
+                    className="bg-blue-600 text-white font-black px-16 py-5 rounded-2xl hover:bg-blue-500 transition-all uppercase tracking-widest shadow-2xl flex items-center gap-3"
+                  >
+                    <CheckCircle className="w-6 h-6" /> FINISH GAME
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => {
+                      setPhase('camp');
+                      setActiveTeamId(null);
+                      setFiringSquadPlayers([]);
+                    }}
+                    className="bg-emerald-600 text-white font-black px-16 py-5 rounded-2xl hover:bg-emerald-500 transition-all uppercase tracking-widest shadow-2xl flex items-center gap-3"
+                  >
+                    <Play className="w-6 h-6" /> CONTINUE TO NEXT TEAM
+                  </button>
+                )}
               </div>
             )}
           </motion.div>
