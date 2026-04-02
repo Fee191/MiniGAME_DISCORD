@@ -13,6 +13,15 @@ export default function PrizeConfigScreen({ state, setState }: PrizeConfigScreen
   const [commonContent, setCommonContent] = useState('');
 
   useEffect(() => {
+    if (state.selectedGame === 'game9' && state.players.length > 0) {
+      const calculatedPrizes = Math.floor(state.players.length / 10);
+      if (calculatedPrizes > 0 && prizeCount !== calculatedPrizes) {
+        setPrizeCount(calculatedPrizes);
+      }
+    }
+  }, [state.selectedGame, state.players.length]);
+
+  useEffect(() => {
     const count = typeof prizeCount === 'number' ? prizeCount : 0;
     if (count === state.prizes.length) return;
 
@@ -49,7 +58,7 @@ export default function PrizeConfigScreen({ state, setState }: PrizeConfigScreen
       alert(`The number of prizes (${state.prizes.length}) cannot be greater than the number of players (${state.players.length})!`);
       return;
     }
-    setState(s => ({ ...s, view: s.selectedGame as 'game1' | 'game2', winners: [] }));
+    setState(s => ({ ...s, view: s.selectedGame as string, winners: [] }));
   };
 
   return (

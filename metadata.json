@@ -1,5 +1,5 @@
 {
-  "name": "Mini-game | Discord Ghost Story: Love Destiny",
-  "description": "Nền tảng tổ chức mini game cho sự kiện Discord Ghost Story: Love Destiny.",
+  "name": "Sniper Elimination Game (Trò chơi Bắn súng Loại trừ)",
+  "description": "A game where players are arranged in columns. Shooting a player eliminates them and everyone behind them in that column. The last column standing wins.",
   "requestFramePermissions": []
 }

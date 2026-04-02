@@ -49,6 +49,12 @@ const AVAILABLE_GAMES = [
     name: 'Space Race',
     description: 'Launch to the moon first',
     color: 'from-slate-700 to-slate-900 hover:from-slate-600 hover:to-slate-800',
+  },
+  {
+    id: 'game9',
+    name: 'Sniper Elimination',
+    description: 'Eliminate rows until only one column remains',
+    color: 'from-zinc-800 to-black hover:from-zinc-700 hover:to-zinc-900',
   }
   // Add future games here easily:
 ];
