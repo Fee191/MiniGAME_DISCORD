@@ -21,36 +21,6 @@ const AVAILABLE_GAMES = [
     color: 'from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500',
   },
   {
-    id: 'game4',
-    name: 'Battle Royale',
-    description: 'Survival of the luckiest on a shrinking grid',
-    color: 'from-red-500 to-orange-600 hover:from-red-400 hover:to-orange-500',
-  },
-  {
-    id: 'game5',
-    name: 'Tower Climb',
-    description: 'Race to the top of the tower',
-    color: 'from-indigo-500 to-blue-600 hover:from-indigo-400 hover:to-blue-500',
-  },
-  {
-    id: 'game6',
-    name: 'Glass Bridge',
-    description: 'Cross the bridge of luck',
-    color: 'from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500',
-  },
-  {
-    id: 'game7',
-    name: 'Mystery Boxes',
-    description: 'Pick the right box to survive',
-    color: 'from-pink-500 to-rose-600 hover:from-pink-400 hover:to-rose-500',
-  },
-  {
-    id: 'game8',
-    name: 'Space Race',
-    description: 'Launch to the moon first',
-    color: 'from-slate-700 to-slate-900 hover:from-slate-600 hover:to-slate-800',
-  },
-  {
     id: 'game9',
     name: 'Sniper Elimination',
     description: 'Eliminate rows until only one column remains',

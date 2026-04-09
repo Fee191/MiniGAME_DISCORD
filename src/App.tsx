@@ -8,11 +8,6 @@ import ConfigScreen from './components/ConfigScreen';
 import PrizeConfigScreen from './components/PrizeConfigScreen';
 import Game1Screen from './components/Game1Screen';
 import Game2Screen from './components/Game2Screen';
-import Game4Screen from './components/Game4Screen';
-import Game5Screen from './components/Game5Screen';
-import Game6Screen from './components/Game6Screen';
-import Game7Screen from './components/Game7Screen';
-import Game8Screen from './components/Game8Screen';
 import Game9Screen from './components/Game9Screen';
 import ResultScreen from './components/ResultScreen';
 import { AppState } from './types';
@@ -53,11 +48,6 @@ export default function App() {
           {state.view === 'prizeConfig' && <PrizeConfigScreen state={state} setState={setState} />}
           {state.view === 'game1' && <Game1Screen state={state} setState={setState} />}
           {state.view === 'game2' && <Game2Screen state={state} setState={setState} />}
-          {state.view === 'game4' && <Game4Screen state={state} setState={setState} />}
-          {state.view === 'game5' && <Game5Screen state={state} setState={setState} />}
-          {state.view === 'game6' && <Game6Screen state={state} setState={setState} />}
-          {state.view === 'game7' && <Game7Screen state={state} setState={setState} />}
-          {state.view === 'game8' && <Game8Screen state={state} setState={setState} />}
           {state.view === 'game9' && <Game9Screen state={state} setState={setState} />}
           {state.view === 'result' && <ResultScreen state={state} setState={setState} />}
         </div>

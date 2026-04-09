@@ -1,5 +1,5 @@
 {
-  "name": "Sniper Elimination Game (Trò chơi Bắn súng Loại trừ)",
-  "description": "A game where players are arranged in columns. Shooting a player eliminates them and everyone behind them in that column. The last column standing wins.",
+  "name": "Mini Game",
+  "description": "Pick some random lucky player",
   "requestFramePermissions": []
 }

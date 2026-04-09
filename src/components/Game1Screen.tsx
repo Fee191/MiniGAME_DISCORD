@@ -105,24 +105,35 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
   const handleSpinTie = () => {
     if (phase !== 'tied') return;
 
-    // Reveal the winner (either the only match or one picked from many)
-    setPhase('spinning_tie');
-
     const finalWinner = tiedPlayers.length === 1 
       ? tiedPlayers[0] 
       : tiedPlayers[Math.floor(Math.random() * tiedPlayers.length)];
     
     setWinner(finalWinner);
 
+    if (tiedPlayers.length === 1) {
+      // Skip spinning if there's only 1 matching ID
+      setDisplayText(finalWinner.id);
+      setPhase('revealed');
+      triggerConfetti();
+      
+      setState(s => ({
+        ...s,
+        winners: [...s.winners, { prize: currentPrize, player: finalWinner }]
+      }));
+      setRemainingPlayers(prev => prev.filter(p => p.id !== finalWinner.id));
+      return;
+    }
+
+    // Reveal the winner (picked from many)
+    setPhase('spinning_tie');
+
     let ticks = 0;
     const maxTicks = 50;
     
     const interval = setInterval(() => {
       ticks++;
-      // If multiple, cycle through them. If one, just "shake" or cycle random IDs to keep suspense
-      const randomPlayer = tiedPlayers.length > 1 
-        ? tiedPlayers[Math.floor(Math.random() * tiedPlayers.length)]
-        : remainingPlayers[Math.floor(Math.random() * remainingPlayers.length)];
+      const randomPlayer = tiedPlayers[Math.floor(Math.random() * tiedPlayers.length)];
       
       setDisplayText(randomPlayer.id);
 

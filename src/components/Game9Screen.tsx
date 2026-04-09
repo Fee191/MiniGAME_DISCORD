@@ -55,7 +55,7 @@ const StickFigure = ({ color = "currentColor", size = 40, opacity = 1, isDead = 
     idClasses += "-top-4 text-[6px] text-stone-500/70 bg-transparent";
   } else {
     idClasses += "border ";
-    if (largeId) idClasses += "-top-10 text-sm px-3 py-1 ";
+    if (largeId) idClasses += "-top-12 text-xl px-4 py-2 ";
     else idClasses += "-top-6 text-[8px] px-2 py-0.5 ";
     
     if (isWinner) idClasses += "bg-yellow-400 text-black border-yellow-500 shadow-[0_0_15px_rgba(250,204,21,0.5)]";
@@ -84,7 +84,7 @@ export default function Game9Screen({ state, setState }: Game9ScreenProps) {
   const [teams, setTeams] = useState<Team[]>([]);
   const [activeTeamId, setActiveTeamId] = useState<string | null>(null);
   const [firingSquadPlayers, setFiringSquadPlayers] = useState<(Player & { isAlive: boolean })[]>([]);
-  const [phase, setPhase] = useState<'camp' | 'selecting' | 'dragging' | 'firing' | 'winner'>('camp');
+  const [phase, setPhase] = useState<'camp' | 'selecting' | 'dragging' | 'firing' | 'winner' | 'bombing'>('camp');
   const [isAutoPlaying, setIsAutoPlaying] = useState(false);
   const [scopePos, setScopePos] = useState({ x: 50, y: 50 });
   const [isFiring, setIsFiring] = useState(false);
@@ -164,6 +164,19 @@ export default function Game9Screen({ state, setState }: Game9ScreenProps) {
     }
     return () => clearInterval(interval);
   }, [phase]);
+
+  const triggerBombing = useCallback(async () => {
+    setPhase('bombing');
+    
+    // Wait for airplane to fly over and drop bombs
+    await new Promise(r => setTimeout(r, 1500));
+    
+    // Set all remaining camp teams to eliminated
+    setTeams(prev => prev.map(t => t.status === 'camp' ? { ...t, status: 'eliminated' } : t));
+    
+    await new Promise(r => setTimeout(r, 3000));
+    setState(s => ({ ...s, view: 'result' }));
+  }, [setState]);
 
   // Handle selecting a team
   const selectTeam = useCallback(async () => {
@@ -311,7 +324,16 @@ export default function Game9Screen({ state, setState }: Game9ScreenProps) {
     let timer: any;
     if (isAutoPlaying) {
       if (phase === 'camp') {
-        timer = setTimeout(selectTeam, 2000);
+        if (state.winners.length >= state.prizes.length) {
+          const remainingTeams = teams.filter(t => t.status === 'camp').length;
+          if (remainingTeams > 0) {
+            timer = setTimeout(triggerBombing, 2000);
+          } else {
+            timer = setTimeout(() => setState(s => ({ ...s, view: 'result' })), 2000);
+          }
+        } else {
+          timer = setTimeout(selectTeam, 2000);
+        }
       } else if (phase === 'firing' && !isFiring) {
         timer = setTimeout(handleShoot, 2000);
       } else if (phase === 'winner') {
@@ -321,11 +343,17 @@ export default function Game9Screen({ state, setState }: Game9ScreenProps) {
             setActiveTeamId(null);
             setFiringSquadPlayers([]);
           }, 5000);
+        } else {
+          timer = setTimeout(() => {
+            setPhase('camp');
+            setActiveTeamId(null);
+            setFiringSquadPlayers([]);
+          }, 5000);
         }
       }
     }
     return () => clearTimeout(timer);
-  }, [isAutoPlaying, phase, isFiring, selectTeam, handleShoot, state.winners.length, state.prizes.length]);
+  }, [isAutoPlaying, phase, isFiring, selectTeam, handleShoot, triggerBombing, state.winners.length, state.prizes.length, teams, setState]);
 
   const triggerConfetti = () => {
     confetti({
@@ -348,16 +376,25 @@ export default function Game9Screen({ state, setState }: Game9ScreenProps) {
   return (
     <div className="h-screen w-screen flex flex-col p-2 md:p-4 text-zinc-900 overflow-hidden relative bg-stone-200">
       {/* Prison Camp Background */}
-      <div className="absolute inset-0 z-0 opacity-40 pointer-events-none overflow-hidden">
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
         {/* Brick Floor Pattern */}
-        <div className="absolute inset-0 bg-stone-300" style={{ 
+        <div className="absolute inset-0 bg-stone-300 opacity-40" style={{ 
           backgroundImage: `linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px), linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px)`,
           backgroundSize: '40px 20px'
         }} />
         
         {/* Dirt Patches */}
-        <div className="absolute top-1/4 left-1/4 w-64 h-32 bg-stone-400/30 rounded-full blur-3xl transform rotate-12" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-48 bg-stone-400/30 rounded-full blur-3xl transform -rotate-12" />
+        <div className="absolute top-1/4 left-1/4 w-64 h-32 bg-stone-400/30 rounded-full blur-3xl transform rotate-12 opacity-40" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-48 bg-stone-400/30 rounded-full blur-3xl transform -rotate-12 opacity-40" />
+
+        {/* Smoke and Fire Effects */}
+        <div className="absolute top-0 left-10 w-96 h-96 bg-stone-800/20 rounded-full blur-[100px] animate-pulse" />
+        <div className="absolute top-20 right-20 w-64 h-64 bg-stone-800/30 rounded-full blur-[80px] animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute bottom-10 left-1/3 w-80 h-80 bg-stone-900/20 rounded-full blur-[90px] animate-pulse" style={{ animationDelay: '2s' }} />
+        
+        {/* Distant Fires */}
+        <div className="absolute top-1/4 left-20 w-32 h-32 bg-orange-600/10 rounded-full blur-[60px] animate-pulse" />
+        <div className="absolute top-1/3 right-1/4 w-40 h-40 bg-red-600/10 rounded-full blur-[70px] animate-pulse" style={{ animationDelay: '1.5s' }} />
       </div>
 
       {/* Header */}
@@ -392,8 +429,8 @@ export default function Game9Screen({ state, setState }: Game9ScreenProps) {
       {/* Main Game Area */}
       <motion.div animate={controls} className="flex-1 relative bg-stone-100/80 rounded-3xl border border-stone-300 overflow-hidden shadow-inner">
         
-        {/* PHASE: CAMP / SELECTING / DRAGGING */}
-        {phase === 'camp' || phase === 'selecting' || phase === 'dragging' ? (
+        {/* PHASE: CAMP / SELECTING / DRAGGING / BOMBING */}
+        {phase === 'camp' || phase === 'selecting' || phase === 'dragging' || phase === 'bombing' ? (
           <div className="w-full h-full relative p-4">
             <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-white/90 px-4 py-1 rounded-full text-[10px] font-bold text-stone-600 uppercase tracking-[0.3em] border border-stone-300 shadow-sm z-10">
               Concentration Area
@@ -523,12 +560,21 @@ export default function Game9Screen({ state, setState }: Game9ScreenProps) {
             {phase === 'camp' && !isAutoPlaying && (
               <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-50">
                 {state.winners.length >= state.prizes.length ? (
-                  <button 
-                    onClick={() => setState(s => ({ ...s, view: 'result' }))}
-                    className="bg-blue-600 text-white font-black px-12 py-4 rounded-2xl hover:bg-blue-500 transition-all uppercase tracking-widest shadow-2xl flex items-center gap-3"
-                  >
-                    <CheckCircle className="w-6 h-6" /> FINISH GAME
-                  </button>
+                  teams.filter(t => t.status === 'camp').length > 0 ? (
+                    <button 
+                      onClick={triggerBombing}
+                      className="bg-red-600 text-white font-black px-12 py-4 rounded-2xl hover:bg-red-500 transition-all uppercase tracking-widest shadow-2xl flex items-center gap-3"
+                    >
+                      <Skull className="w-6 h-6" /> DESTROY CAMP
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={() => setState(s => ({ ...s, view: 'result' }))}
+                      className="bg-blue-600 text-white font-black px-12 py-4 rounded-2xl hover:bg-blue-500 transition-all uppercase tracking-widest shadow-2xl flex items-center gap-3"
+                    >
+                      <CheckCircle className="w-6 h-6" /> FINISH GAME
+                    </button>
+                  )
                 ) : (
                   <button 
                     onClick={selectTeam}
@@ -539,6 +585,44 @@ export default function Game9Screen({ state, setState }: Game9ScreenProps) {
                 )}
               </div>
             )}
+
+            {/* Bombing Animation */}
+            <AnimatePresence>
+              {phase === 'bombing' && (
+                <>
+                  {/* Airplane */}
+                  <motion.div
+                    initial={{ left: '-20%', top: '10%' }}
+                    animate={{ left: '120%', top: '90%' }}
+                    transition={{ duration: 2, ease: "linear" }}
+                    className="absolute z-[100] w-32 h-32 pointer-events-none"
+                  >
+                    <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-2xl" style={{ transform: 'rotate(45deg)' }}>
+                      <path d="M50 10 L60 40 L90 50 L60 60 L50 90 L40 60 L10 50 L40 40 Z" fill="#1c1917" />
+                      <path d="M50 20 L55 45 L80 50 L55 55 L50 80 L45 55 L20 50 L45 45 Z" fill="#292524" />
+                    </svg>
+                  </motion.div>
+
+                  {/* Explosions */}
+                  {[...Array(10)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: [0, 2, 3], opacity: [0, 1, 0] }}
+                      transition={{ duration: 1, delay: 0.5 + Math.random() * 1.5 }}
+                      className="absolute z-[90] -translate-x-1/2 -translate-y-1/2 rounded-full"
+                      style={{
+                        left: `${20 + Math.random() * 60}%`,
+                        top: `${20 + Math.random() * 60}%`,
+                        width: 100 + Math.random() * 100,
+                        height: 100 + Math.random() * 100,
+                        background: `radial-gradient(circle, rgba(239,68,68,0.8) 0%, rgba(249,115,22,0.6) 50%, rgba(0,0,0,0) 100%)`
+                      }}
+                    />
+                  ))}
+                </>
+              )}
+            </AnimatePresence>
           </div>
         ) : null}
 
@@ -602,7 +686,7 @@ export default function Game9Screen({ state, setState }: Game9ScreenProps) {
                   >
                     <StickFigure 
                       color={p.isAlive ? "#e4e4e7" : "#450a0a"} 
-                      size={80} 
+                      size={120} 
                       isDead={!p.isAlive} 
                       id={p.id}
                       largeId={true}
