@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Trophy, ArrowRight, RotateCcw, XSquare, Ticket, Star, AlertCircle } from 'lucide-react';
+import { Trophy, ArrowRight, RotateCcw, XSquare, Ticket, Star, AlertCircle, CheckCircle } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { AppState, Player } from '../types';
 
@@ -116,12 +116,6 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
       setDisplayText(finalWinner.id);
       setPhase('revealed');
       triggerConfetti();
-      
-      setState(s => ({
-        ...s,
-        winners: [...s.winners, { prize: currentPrize, player: finalWinner }]
-      }));
-      setRemainingPlayers(prev => prev.filter(p => p.id !== finalWinner.id));
       return;
     }
 
@@ -142,14 +136,43 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
         setDisplayText(finalWinner.id);
         setPhase('revealed');
         triggerConfetti();
-        
-        setState(s => ({
-          ...s,
-          winners: [...s.winners, { prize: currentPrize, player: finalWinner }]
-        }));
-        setRemainingPlayers(prev => prev.filter(p => p.id !== finalWinner.id));
       }
     }, 50);
+  };
+
+  const acceptWinner = () => {
+    if (!winner || !currentPrize) return;
+    setState(s => ({
+      ...s,
+      winners: [...s.winners, { prize: currentPrize, player: winner }]
+    }));
+    setRemainingPlayers(prev => prev.filter(p => p.id !== winner.id));
+    nextPrize();
+  };
+
+  const rejectWinner = () => {
+    if (!winner || !currentPrize) return;
+    
+    setState(s => ({
+      ...s,
+      rejected: [...s.rejected, { prize: currentPrize, player: winner }]
+    }));
+    
+    setRemainingPlayers(prev => prev.filter(p => p.id !== winner.id));
+    
+    const newTiedPlayers = tiedPlayers.filter(p => p.id !== winner.id);
+    if (newTiedPlayers.length > 0) {
+      setTiedPlayers(newTiedPlayers);
+      setPhase('tied');
+      setWinner(null);
+      setDisplayText(targetCode);
+    } else {
+      setPhase('idle');
+      setWinner(null);
+      setDisplayText('????');
+      setTargetCode('');
+      setTiedPlayers([]);
+    }
   };
 
   const triggerConfetti = () => {
@@ -188,7 +211,20 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
     setTiedPlayers([]);
   };
 
-  if (!currentPrize) return null;
+  if (!currentPrize) {
+    return (
+      <div className="h-screen w-screen flex flex-col items-center justify-center bg-slate-900 text-white">
+        <Trophy className="w-24 h-24 text-yellow-400 mb-8 animate-bounce" />
+        <h1 className="text-4xl font-bold mb-8">Đã trao hết giải thưởng!</h1>
+        <button
+          onClick={() => setState(s => ({ ...s, view: 'result' }))}
+          className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xl py-4 px-12 rounded-xl shadow-lg transition-all"
+        >
+          XEM KẾT QUẢ
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className={`h-screen w-screen flex flex-col p-4 md:p-8 text-white overflow-hidden relative ${state.bgImage ? 'bg-black/10' : 'bg-slate-900'}`}>
@@ -432,21 +468,30 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
             )}
 
             {phase === 'revealed' && (
-              <motion.button
-                key="next-btn"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={nextPrize}
-                className="bg-slate-700 hover:bg-slate-600 text-white font-bold text-xl py-4 px-12 rounded-xl flex items-center gap-3 transition-all shadow-lg uppercase tracking-wider"
-              >
-                {currentPrizeIndex < state.prizes.length - 1 ? (
-                  <>NEXT PRIZE <ArrowRight className="w-6 h-6" /></>
-                ) : (
-                  <>VIEW RESULTS <Trophy className="w-6 h-6" /></>
-                )}
-              </motion.button>
+              <div className="flex gap-4">
+                <motion.button
+                  key="accept-btn"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={acceptWinner}
+                  className="bg-green-600 hover:bg-green-500 text-white font-bold text-xl py-4 px-8 rounded-xl flex items-center gap-3 transition-all shadow-lg uppercase tracking-wider"
+                >
+                  <CheckCircle className="w-6 h-6" /> CHẤP NHẬN
+                </motion.button>
+                <motion.button
+                  key="reject-btn"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={rejectWinner}
+                  className="bg-red-600 hover:bg-red-500 text-white font-bold text-xl py-4 px-8 rounded-xl flex items-center gap-3 transition-all shadow-lg uppercase tracking-wider"
+                >
+                  <XSquare className="w-6 h-6" /> HỦY KẾT QUẢ
+                </motion.button>
+              </div>
             )}
           </AnimatePresence>
         </div>

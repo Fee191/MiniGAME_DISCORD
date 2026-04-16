@@ -8,8 +8,10 @@ import ConfigScreen from './components/ConfigScreen';
 import PrizeConfigScreen from './components/PrizeConfigScreen';
 import Game1Screen from './components/Game1Screen';
 import Game2Screen from './components/Game2Screen';
+import Game3Screen from './components/Game3Screen';
 import Game9Screen from './components/Game9Screen';
 import ResultScreen from './components/ResultScreen';
+import HistoryPanel from './components/HistoryPanel';
 import { AppState } from './types';
 
 export default function App() {
@@ -20,8 +22,11 @@ export default function App() {
     bgImage: '',
     players: [],
     prizes: [],
-    winners: []
+    winners: [],
+    rejected: []
   });
+
+  const isGameView = ['game1', 'game2', 'game3', 'game9'].includes(state.view);
 
   return (
     <div 
@@ -40,14 +45,20 @@ export default function App() {
       )}
 
       {/* Main Content Area */}
-      <div className="relative z-10 w-full h-full flex flex-col">
-        {/* Persistent Header - REMOVED */}
+      <div className="relative z-10 w-full h-full flex">
+        {/* Persistent History Panel (only show in game views) */}
+        {isGameView && (
+          <div className="w-64 md:w-72 shrink-0 h-screen">
+            <HistoryPanel state={state} />
+          </div>
+        )}
 
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 h-screen overflow-auto relative">
           {state.view === 'config' && <ConfigScreen state={state} setState={setState} />}
           {state.view === 'prizeConfig' && <PrizeConfigScreen state={state} setState={setState} />}
           {state.view === 'game1' && <Game1Screen state={state} setState={setState} />}
           {state.view === 'game2' && <Game2Screen state={state} setState={setState} />}
+          {state.view === 'game3' && <Game3Screen state={state} setState={setState} />}
           {state.view === 'game9' && <Game9Screen state={state} setState={setState} />}
           {state.view === 'result' && <ResultScreen state={state} setState={setState} />}
         </div>

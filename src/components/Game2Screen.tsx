@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Trophy, Flag, Play, FastForward, ArrowRight, RotateCcw, XSquare, AlertCircle } from 'lucide-react';
+import { Trophy, Flag, Play, FastForward, ArrowRight, RotateCcw, XSquare, AlertCircle, CheckCircle } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { AppState, Prize, Player } from '../types';
 import { ANIMALS } from '../utils';
@@ -129,15 +129,6 @@ export default function Game2Screen({ state, setState }: Game2ScreenProps) {
     setCurrentWinner(winner);
     if (requestRef.current) cancelAnimationFrame(requestRef.current);
     triggerConfetti();
-
-    const winnerPlayer = remainingPlayers.find(p => p.id === winner.id)!;
-
-    // Update global state
-    setState(s => ({
-      ...s,
-      winners: [...s.winners, { prize: currentPrize, player: winnerPlayer }]
-    }));
-    setRemainingPlayers(prev => prev.filter(p => p.id !== winner.id));
   };
 
   const triggerConfetti = () => {
@@ -167,8 +158,33 @@ export default function Game2Screen({ state, setState }: Game2ScreenProps) {
     frame();
   };
 
-  const nextRace = () => {
+  const acceptWinner = () => {
+    if (!currentWinner) return;
+    const winnerPlayer = remainingPlayers.find(p => p.id === currentWinner.id)!;
+    
+    setState(s => ({
+      ...s,
+      winners: [...s.winners, { prize: currentPrize, player: winnerPlayer }]
+    }));
+    setRemainingPlayers(prev => prev.filter(p => p.id !== currentWinner.id));
+    
     setCurrentPrizeIndex(prev => prev + 1);
+    setRaceState('idle');
+    setCurrentWinner(null);
+    setSpeedMultiplier(1);
+    speedMultiplierRef.current = 1;
+  };
+
+  const rejectWinner = () => {
+    if (!currentWinner || !currentPrize) return;
+    const winnerPlayer = remainingPlayers.find(p => p.id === currentWinner.id)!;
+    
+    setState(s => ({
+      ...s,
+      rejected: [...s.rejected, { prize: currentPrize, player: winnerPlayer }]
+    }));
+    
+    setRemainingPlayers(prev => prev.filter(p => p.id !== currentWinner.id));
     setRaceState('idle');
     setCurrentWinner(null);
     setSpeedMultiplier(1);
@@ -204,7 +220,20 @@ export default function Game2Screen({ state, setState }: Game2ScreenProps) {
   // Only show top 8 on the main track for better visibility
   const topRacers = sortedRacers.slice(0, 8);
 
-  if (!currentPrize) return null;
+  if (!currentPrize) {
+    return (
+      <div className="h-screen w-screen flex flex-col items-center justify-center bg-black text-white">
+        <Trophy className="w-24 h-24 text-yellow-400 mb-8 animate-bounce" />
+        <h1 className="text-4xl font-bold mb-8">Đã trao hết giải thưởng!</h1>
+        <button
+          onClick={() => setState(s => ({ ...s, view: 'result' }))}
+          className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xl py-4 px-12 rounded-xl shadow-lg transition-all"
+        >
+          XEM KẾT QUẢ
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen w-screen bg-black flex flex-col text-white overflow-hidden relative z-50">
@@ -247,19 +276,6 @@ export default function Game2Screen({ state, setState }: Game2ScreenProps) {
               <FastForward className="w-5 h-5" /> 
               <span className="hidden md:inline">{speedMultiplier > 1 ? 'FAST FORWARD (x3)' : 'FAST FORWARD'}</span>
               <span className="md:hidden">x{speedMultiplier}</span>
-            </button>
-          )}
-
-          {raceState === 'finished' && (
-            <button
-              onClick={nextRace}
-              className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white font-bold py-2 px-6 md:py-3 md:px-8 rounded-full shadow-[0_0_30px_rgba(59,130,246,0.4)] flex items-center gap-2 transition-transform hover:scale-105"
-            >
-              {currentPrizeIndex < state.prizes.length - 1 ? (
-                <>NEXT RACE <ArrowRight className="w-5 h-5" /></>
-              ) : (
-                <>VIEW RESULTS <Trophy className="w-5 h-5" /></>
-              )}
             </button>
           )}
 
@@ -460,16 +476,18 @@ export default function Game2Screen({ state, setState }: Game2ScreenProps) {
                 </p>
               </div>
 
-              <div className="mt-8 md:mt-10">
+              <div className="mt-8 md:mt-10 flex flex-col md:flex-row justify-center gap-4">
                 <button
-                  onClick={nextRace}
-                  className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-black text-lg md:text-xl py-3 px-8 md:py-4 md:px-12 rounded-full shadow-[0_0_40px_rgba(234,179,8,0.4)] transition-transform hover:scale-105 flex items-center gap-3 mx-auto"
+                  onClick={acceptWinner}
+                  className="bg-green-600 hover:bg-green-500 text-white font-bold text-lg md:text-xl py-3 px-8 md:py-4 md:px-12 rounded-full shadow-[0_0_40px_rgba(22,163,74,0.4)] transition-transform hover:scale-105 flex items-center justify-center gap-3"
                 >
-                  {currentPrizeIndex < state.prizes.length - 1 ? (
-                    <>NEXT RACE <ArrowRight className="w-5 h-5 md:w-6 md:h-6" /></>
-                  ) : (
-                    <>VIEW RESULTS <Trophy className="w-5 h-5 md:w-6 md:h-6" /></>
-                  )}
+                  <CheckCircle className="w-5 h-5 md:w-6 md:h-6" /> CHẤP NHẬN
+                </button>
+                <button
+                  onClick={rejectWinner}
+                  className="bg-red-600 hover:bg-red-500 text-white font-bold text-lg md:text-xl py-3 px-8 md:py-4 md:px-12 rounded-full shadow-[0_0_40px_rgba(220,38,38,0.4)] transition-transform hover:scale-105 flex items-center justify-center gap-3"
+                >
+                  <XSquare className="w-5 h-5 md:w-6 md:h-6" /> HỦY KẾT QUẢ
                 </button>
               </div>
             </motion.div>

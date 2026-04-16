@@ -300,24 +300,70 @@ export default function Game9Screen({ state, setState }: Game9ScreenProps) {
       setPhase('winner');
       triggerConfetti();
       
-      // Add to global winners
-      const prizeIdx = state.winners.length;
-      if (prizeIdx < state.prizes.length) {
-        setState(s => ({
-          ...s,
-          winners: [...s.winners, {
-            prize: s.prizes[prizeIdx],
-            player: { id: winner.id, name: winner.name }
-          }]
-        }));
-      }
-
       // Mark team as eliminated
       setTeams(prev => prev.map(t => t.id === activeTeamId ? { ...t, status: 'eliminated' } : t));
       
       // If we still need more winners, wait for user to click continue or auto-play
     }
-  }, [phase, firingSquadPlayers, isFiring, state.winners.length, state.prizes.length, activeTeamId, setState]);
+  }, [phase, firingSquadPlayers, isFiring, activeTeamId]);
+
+  const acceptWinner = useCallback(() => {
+    const winner = firingSquadPlayers.find(p => p.isAlive);
+    if (!winner) return;
+    
+    const prizeIdx = state.winners.length;
+    if (prizeIdx < state.prizes.length) {
+      setState(s => {
+        const newWinners = [...s.winners, {
+          prize: s.prizes[prizeIdx],
+          player: { id: winner.id, name: winner.name }
+        }];
+        if (newWinners.length >= s.prizes.length) {
+          return { ...s, winners: newWinners, view: 'result' };
+        }
+        return { ...s, winners: newWinners };
+      });
+    }
+    
+    setPhase('camp');
+    setActiveTeamId(null);
+    setFiringSquadPlayers([]);
+  }, [firingSquadPlayers, state.winners.length, state.prizes.length, setState]);
+
+  const rejectWinner = useCallback(() => {
+    const winner = firingSquadPlayers.find(p => p.isAlive);
+    if (!winner || !activeTeamId) return;
+    
+    const currentPrize = state.prizes[state.winners.length];
+    if (currentPrize) {
+      setState(s => ({
+        ...s,
+        rejected: [...s.rejected, { prize: currentPrize, player: winner }]
+      }));
+    }
+    
+    // Revive the team but remove the rejected winner
+    setTeams(prev => prev.map(t => {
+      if (t.id === activeTeamId) {
+        const newPlayers = t.players.filter(p => p.id !== winner.id);
+        return { ...t, status: newPlayers.length > 0 ? 'selected' : 'eliminated', players: newPlayers };
+      }
+      return t;
+    }));
+    
+    const activeTeam = teams.find(t => t.id === activeTeamId);
+    if (activeTeam) {
+      const newPlayers = activeTeam.players.filter(p => p.id !== winner.id);
+      if (newPlayers.length === 0) {
+        setPhase('camp');
+        setActiveTeamId(null);
+        setFiringSquadPlayers([]);
+      } else {
+        setFiringSquadPlayers(newPlayers.map(p => ({ ...p, isAlive: true })));
+        setPhase('firing');
+      }
+    }
+  }, [firingSquadPlayers, activeTeamId, teams]);
 
   // Auto-play logic
   useEffect(() => {
@@ -337,23 +383,13 @@ export default function Game9Screen({ state, setState }: Game9ScreenProps) {
       } else if (phase === 'firing' && !isFiring) {
         timer = setTimeout(handleShoot, 2000);
       } else if (phase === 'winner') {
-        if (state.winners.length < state.prizes.length) {
-          timer = setTimeout(() => {
-            setPhase('camp');
-            setActiveTeamId(null);
-            setFiringSquadPlayers([]);
-          }, 5000);
-        } else {
-          timer = setTimeout(() => {
-            setPhase('camp');
-            setActiveTeamId(null);
-            setFiringSquadPlayers([]);
-          }, 5000);
-        }
+        timer = setTimeout(() => {
+          acceptWinner();
+        }, 5000);
       }
     }
     return () => clearTimeout(timer);
-  }, [isAutoPlaying, phase, isFiring, selectTeam, handleShoot, triggerBombing, state.winners.length, state.prizes.length, teams, setState]);
+  }, [isAutoPlaying, phase, isFiring, selectTeam, handleShoot, triggerBombing, state.winners.length, state.prizes.length, teams, setState, acceptWinner]);
 
   const triggerConfetti = () => {
     confetti({
@@ -559,8 +595,8 @@ export default function Game9Screen({ state, setState }: Game9ScreenProps) {
 
             {phase === 'camp' && !isAutoPlaying && (
               <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-50">
-                {state.winners.length >= state.prizes.length ? (
-                  teams.filter(t => t.status === 'camp').length > 0 ? (
+                {state.winners.length >= state.prizes.length || teams.filter(t => t.status === 'camp').length === 0 ? (
+                  state.winners.length >= state.prizes.length && teams.filter(t => t.status === 'camp').length > 0 ? (
                     <button 
                       onClick={triggerBombing}
                       className="bg-red-600 text-white font-black px-12 py-4 rounded-2xl hover:bg-red-500 transition-all uppercase tracking-widest shadow-2xl flex items-center gap-3"
@@ -712,26 +748,19 @@ export default function Game9Screen({ state, setState }: Game9ScreenProps) {
             )}
 
             {phase === 'winner' && !isAutoPlaying && (
-              <div className="mt-24">
-                {state.winners.length >= state.prizes.length ? (
-                  <button 
-                    onClick={() => setState(s => ({ ...s, view: 'result' }))}
-                    className="bg-blue-600 text-white font-black px-16 py-5 rounded-2xl hover:bg-blue-500 transition-all uppercase tracking-widest shadow-2xl flex items-center gap-3"
-                  >
-                    <CheckCircle className="w-6 h-6" /> FINISH GAME
-                  </button>
-                ) : (
-                  <button 
-                    onClick={() => {
-                      setPhase('camp');
-                      setActiveTeamId(null);
-                      setFiringSquadPlayers([]);
-                    }}
-                    className="bg-emerald-600 text-white font-black px-16 py-5 rounded-2xl hover:bg-emerald-500 transition-all uppercase tracking-widest shadow-2xl flex items-center gap-3"
-                  >
-                    <Play className="w-6 h-6" /> CONTINUE TO NEXT TEAM
-                  </button>
-                )}
+              <div className="mt-24 flex gap-4">
+                <button 
+                  onClick={acceptWinner}
+                  className="bg-green-600 text-white font-black px-12 py-5 rounded-2xl hover:bg-green-500 transition-all uppercase tracking-widest shadow-2xl flex items-center gap-3"
+                >
+                  <CheckCircle className="w-6 h-6" /> CHẤP NHẬN
+                </button>
+                <button 
+                  onClick={rejectWinner}
+                  className="bg-red-600 text-white font-black px-12 py-5 rounded-2xl hover:bg-red-500 transition-all uppercase tracking-widest shadow-2xl flex items-center gap-3"
+                >
+                  <XSquare className="w-6 h-6" /> HỦY KẾT QUẢ
+                </button>
               </div>
             )}
           </motion.div>

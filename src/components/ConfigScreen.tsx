@@ -21,6 +21,12 @@ const AVAILABLE_GAMES = [
     color: 'from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500',
   },
   {
+    id: 'game3',
+    name: 'Stickman Tournament',
+    description: 'Players fight in brackets to win prizes',
+    color: 'from-orange-500 to-red-600 hover:from-orange-400 hover:to-red-500',
+  },
+  {
     id: 'game9',
     name: 'Sniper Elimination',
     description: 'Eliminate rows until only one column remains',

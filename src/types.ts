@@ -22,4 +22,5 @@ export interface AppState {
   players: Player[];
   prizes: Prize[];
   winners: Winner[];
+  rejected: Winner[];
 }
