@@ -211,9 +211,9 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
     setTiedPlayers([]);
   };
 
-  if (!currentPrize) {
+  if (isFinished || !currentPrize) {
     return (
-      <div className="h-screen w-screen flex flex-col items-center justify-center bg-slate-900 text-white">
+      <div className="h-screen w-screen flex flex-col items-center justify-center bg-slate-900 text-white relative z-[100]">
         <Trophy className="w-24 h-24 text-yellow-400 mb-8 animate-bounce" />
         <h1 className="text-4xl font-bold mb-8">Đã trao hết giải thưởng!</h1>
         <button
@@ -313,7 +313,7 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
       <div className="flex-1 w-full flex flex-col md:flex-row gap-6 pt-20 md:pt-24 pb-8 relative z-10 min-h-0 max-w-7xl mx-auto">
         
         {/* Left/Center: Lottery Machine & Titles */}
-        <div className="flex-1 flex flex-col items-center justify-center gap-2 min-w-0 md:pl-8 lg:pl-16 mb-8 mt-12 md:mt-16">
+        <div className="flex-1 flex flex-col items-center justify-center gap-2 min-w-0 md:pl-8 lg:pl-16 mb-8 mt-12 md:mt-16 w-full">
           
           {/* Event Name */}
           <div className="flex flex-col items-center mb-4 md:mb-8 w-full px-2 md:px-4 mt-2">
@@ -495,37 +495,6 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
             )}
           </AnimatePresence>
         </div>
-        </div>
-
-        {/* Right: Winners History */}
-        <div className="w-full md:w-72 shrink-0 bg-slate-900/80 rounded-2xl border border-white/10 p-4 flex flex-col shadow-xl backdrop-blur-md h-full max-h-[550px] md:max-h-[600px] md:mr-12 lg:mr-20 mt-8 md:mt-16">
-          <div className="flex items-center justify-center gap-2 mb-4 shrink-0 border-b border-white/10 pb-3">
-            <Trophy className="w-5 h-5 text-yellow-400" />
-            <h3 className="text-white font-bold text-lg tracking-widest uppercase">WINNERS</h3>
-          </div>
-          
-          <div className="flex-1 overflow-y-auto space-y-2 custom-scrollbar pr-2 pb-4">
-            <AnimatePresence>
-              {state.winners.length === 0 ? (
-                <div className="text-center text-white/40 italic py-8 text-sm">No winners yet</div>
-              ) : (
-                state.winners.map((winner, idx) => (
-                  <motion.div 
-                    key={winner.player.id + idx}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="bg-white/5 border border-white/10 rounded-lg p-3 flex flex-col gap-1"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-blue-300 font-semibold text-xs">{winner.prize.name}</span>
-                    </div>
-                    <span className="text-white font-mono font-bold text-base truncate">{winner.player.id}</span>
-                    <span className="text-white/60 text-xs truncate">{winner.player.name}</span>
-                  </motion.div>
-                ))
-              )}
-            </AnimatePresence>
-          </div>
         </div>
       </div>
 

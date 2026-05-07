@@ -230,7 +230,11 @@ export default function Game9Screen({ state, setState }: Game9ScreenProps) {
     setFiringSquadPlayers(targetTeam.players.map(p => ({ ...p, isAlive: true })));
     
     await new Promise(r => setTimeout(r, 500));
-    setPhase('firing');
+    if (targetTeam.players.length === 1) {
+      setPhase('winner');
+    } else {
+      setPhase('firing');
+    }
   }, [phase]);
 
   // Continuous scope movement during firing phase
@@ -360,7 +364,11 @@ export default function Game9Screen({ state, setState }: Game9ScreenProps) {
         setFiringSquadPlayers([]);
       } else {
         setFiringSquadPlayers(newPlayers.map(p => ({ ...p, isAlive: true })));
-        setPhase('firing');
+        if (newPlayers.length === 1) {
+          setPhase('winner');
+        } else {
+          setPhase('firing');
+        }
       }
     }
   }, [firingSquadPlayers, activeTeamId, teams]);

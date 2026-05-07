@@ -45,15 +45,11 @@ export default function App() {
       )}
 
       {/* Main Content Area */}
-      <div className="relative z-10 w-full h-full flex">
-        {/* Persistent History Panel (only show in game views) */}
-        {isGameView && (
-          <div className="w-64 md:w-72 shrink-0 h-screen">
-            <HistoryPanel state={state} />
-          </div>
-        )}
+      <div className="relative z-10 w-full h-full flex flex-col">
+        {/* Persistent History Panel (Floating Draggable inside App) */}
+        {isGameView && <HistoryPanel state={state} />}
 
-        <div className="flex-1 h-screen overflow-auto relative">
+        <div className="flex-1 overflow-auto relative">
           {state.view === 'config' && <ConfigScreen state={state} setState={setState} />}
           {state.view === 'prizeConfig' && <PrizeConfigScreen state={state} setState={setState} />}
           {state.view === 'game1' && <Game1Screen state={state} setState={setState} />}

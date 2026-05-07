@@ -131,6 +131,14 @@ export default function Game3Screen({ state, setState }: Game3ScreenProps) {
 
   const allFinished = groups.length > 0 && groups.every(g => g.winner !== null || g.players.length === 0);
 
+  useEffect(() => {
+    if (allFinished && phase === 'group_selection') {
+      setTimeout(() => {
+        setState(s => ({ ...s, view: 'result' }));
+      }, 2000);
+    }
+  }, [allFinished, phase, setState]);
+
   return (
     <div className="w-full h-full flex flex-col items-center p-8 overflow-y-auto">
       {/* Header */}

@@ -220,9 +220,9 @@ export default function Game2Screen({ state, setState }: Game2ScreenProps) {
   // Only show top 8 on the main track for better visibility
   const topRacers = sortedRacers.slice(0, 8);
 
-  if (!currentPrize) {
+  if (isFinished || !currentPrize) {
     return (
-      <div className="h-screen w-screen flex flex-col items-center justify-center bg-black text-white">
+      <div className="h-screen w-screen flex flex-col items-center justify-center bg-black text-white relative z-[100]">
         <Trophy className="w-24 h-24 text-yellow-400 mb-8 animate-bounce" />
         <h1 className="text-4xl font-bold mb-8">Đã trao hết giải thưởng!</h1>
         <button
@@ -390,6 +390,48 @@ export default function Game2Screen({ state, setState }: Game2ScreenProps) {
               ))}
             </AnimatePresence>
           </div>
+
+          {/* Mini-Map (All Racers) */}
+          {sortedRacers.length > 8 && (
+            <div className="h-12 md:h-16 border-t border-white/20 bg-black/80 relative overflow-hidden shrink-0 flex flex-col justify-center">
+              <div className="absolute inset-0 opacity-10 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,#fff_10px,#fff_20px)]" />
+              <div className="absolute right-[8%] top-0 bottom-0 w-4 bg-[repeating-linear-gradient(45deg,#fff,#fff_5px,#000_5px,#000_10px)] z-0 border-l border-red-500" />
+              <div className="absolute left-2 top-1 bottom-1 flex items-center z-10 text-[10px] uppercase font-bold text-white/50 tracking-widest">
+                Mini Map ({sortedRacers.length})
+              </div>
+              
+              <div className="relative w-full h-full mt-4">
+                {sortedRacers.map((racer, idx) => {
+                  const isTop = idx === 0;
+                  const isPodium = idx > 0 && idx < 3;
+                  const isTop8 = idx >= 3 && idx < 8;
+                  const zIndex = 100 - idx;
+                  // Scatter background racers slightly vertically
+                  const yOffset = isTop8 || idx > 7 ? `${((idx % 5) - 2) * 6}px` : '0px';
+
+                  return (
+                    <div
+                      key={`mini-${racer.id}`}
+                      className={`absolute top-1/2 -translate-y-1/2 rounded-full absolute transition-all flex items-center justify-center ${
+                        isTop ? 'w-5 h-5 bg-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.8)] border border-yellow-200' :
+                        isPodium ? 'w-4 h-4 bg-orange-400 shadow-[0_0_8px_rgba(251,146,60,0.8)] border border-orange-200' :
+                        isTop8 ? 'w-3 h-3 bg-white shadow-[0_0_5px_rgba(255,255,255,0.8)]' :
+                        'w-1.5 h-1.5 md:w-2 md:h-2 bg-blue-400/60'
+                      }`}
+                      style={{
+                        left: `${racer.progress}%`,
+                        transform: `translate(-100%, calc(-50% + ${yOffset}))`,
+                        transition: raceState === 'racing' ? 'none' : 'left 0.5s ease-out',
+                        zIndex
+                      }}
+                    >
+                      {isTop && <span className="text-[10px]">👑</span>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Right: Live Leaderboard - Fixed width for landscape */}
