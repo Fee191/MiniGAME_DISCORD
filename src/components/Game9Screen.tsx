@@ -50,16 +50,16 @@ const StickFigure = ({ color = "currentColor", size = 40, opacity = 1, isDead = 
     return () => clearInterval(interval);
   }, [isScrambling, id]);
 
-  let idClasses = "absolute left-1/2 -translate-x-1/2 rounded font-mono font-bold whitespace-nowrap z-20 transition-all duration-300 text-center ";
+  let idClasses = "absolute left-1/2 -translate-x-1/2 font-mono font-bold whitespace-nowrap z-20 transition-all duration-300 text-center ";
   if (isScrambling) {
-    idClasses += "-top-4 text-[6px] text-stone-500/70 bg-transparent";
+    idClasses += "-top-4 text-[8px] text-stone-400/80 bg-transparent";
   } else {
-    idClasses += "border ";
-    if (largeId) idClasses += "-top-[64px] text-[12px] px-2.5 py-1 ";
-    else idClasses += "-top-8 text-[8px] px-1.5 py-0.5 ";
+    idClasses += "border shadow-lg ";
+    if (largeId) idClasses += "-top-[85px] text-[15px] px-4 py-2.5 rounded-xl ";
+    else idClasses += "-top-11 text-[11px] px-2.5 py-1.5 rounded-lg ";
     
-    if (isWinner) idClasses += "bg-yellow-400 text-black border-yellow-500 shadow-[0_0_15px_rgba(250,204,21,0.5)]";
-    else idClasses += "bg-black/90 text-white border-white/10";
+    if (isWinner) idClasses += "bg-yellow-400 text-slate-950 border-yellow-500 shadow-[0_0_20px_rgba(250,204,21,0.7)]";
+    else idClasses += "bg-stone-950/95 text-white border-white/20";
   }
 
   return (
@@ -68,13 +68,13 @@ const StickFigure = ({ color = "currentColor", size = 40, opacity = 1, isDead = 
         <div className={idClasses}>
           <div className="flex flex-col items-center">
             {name && !isScrambling && (showFullId || isDead || isWinner) && (
-              <span className={`font-sans tracking-tight leading-none overflow-hidden text-ellipsis max-w-[120px] font-bold ${
-                largeId ? 'text-[9px] mb-0.5' : 'text-[6px] mb-0.5'
-              } ${isWinner ? 'text-slate-950 border-b border-slate-950/20 w-full pb-px mb-px' : (largeId ? 'text-stone-300' : 'text-stone-400')}`}>
+              <span className={`font-sans tracking-tight leading-none overflow-hidden text-ellipsis max-w-[150px] font-black ${
+                largeId ? 'text-xs md:text-[13px] mb-1.5' : 'text-[9px] mb-1'
+              } ${isWinner ? '!text-slate-950 border-b border-slate-950/45 w-full pb-1 mb-1' : (largeId ? 'text-stone-300' : 'text-stone-400')}`}>
                 {name}
               </span>
             )}
-            <span className="leading-tight shrink-0">{isScrambling ? scrambled : (showFullId ? id : `${id.substring(0, 3)}xxx${id.slice(-1)}`)}</span>
+            <span className={`leading-tight font-extrabold shrink-0 ${isWinner ? '!text-slate-950' : 'text-white'}`}>{isScrambling ? scrambled : (showFullId ? id : `${id.substring(0, 3)}xxx${id.slice(-1)}`)}</span>
           </div>
         </div>
       )}

@@ -564,14 +564,14 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
                 </div>
               ) : (
                 <div className="flex-1 overflow-y-auto custom-scrollbar pr-1">
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-3 gap-1.5 p-0.5">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-3 gap-2.5 p-1">
                     {remainingPlayers.map(p => (
                       <div 
                         key={p.id} 
-                        className="bg-slate-900/30 border border-white/5 p-1.5 rounded-lg flex flex-col justify-center items-center hover:border-white/10 transition-all w-full min-w-0"
+                        className="bg-slate-900/40 border border-white/10 p-3 rounded-xl flex flex-col justify-center items-center hover:border-white/20 transition-all w-full min-w-0 shadow-sm"
                       >
-                        <p className="text-[10px] font-bold text-white/50 truncate w-full text-center">{p.name}</p>
-                        <span className="font-mono font-black text-[10px] text-blue-300 mt-0.5">ID {p.id}</span>
+                        <p className="text-xs md:text-sm font-bold text-white/90 truncate w-full text-center">{p.name}</p>
+                        <span className="font-mono font-black text-xs md:text-sm text-blue-300 mt-1">ID {p.id}</span>
                       </div>
                     ))}
                   </div>
@@ -609,22 +609,22 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
                               animate={{ opacity: 1, scale: 1 }}
                               exit={{ opacity: 0, scale: 0.95 }}
                               key={`initial-match-${p.id}`}
-                              className="p-2 rounded-lg border border-blue-500/20 bg-blue-500/5 hover:bg-blue-500/10 transition-colors flex flex-col justify-between gap-1 relative overflow-hidden"
+                              className="p-3.5 rounded-xl border border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/15 transition-colors flex flex-col justify-between gap-2.5 relative overflow-hidden shadow-sm"
                             >
-                              <div className="min-w-0 flex-1 py-0.5">
-                                <p className="text-[10px] font-bold text-blue-300 truncate">
+                              <div className="min-w-0 flex-1">
+                                <p className="text-xs md:text-sm font-extrabold text-blue-100 truncate">
                                   {p.name}
                                 </p>
                               </div>
-                              <div className="flex items-center justify-between gap-1.5 min-w-0">
-                                <span className="font-mono font-black text-xs px-2 py-0.5 rounded shrink-0 bg-blue-500/20 text-white border border-blue-500/10">
+                              <div className="flex items-center justify-between gap-2 min-w-0">
+                                <span className="font-mono font-black text-xs md:text-sm px-2.5 py-1 rounded shrink-0 bg-blue-500/20 text-white border border-blue-400/20">
                                   ID {p.id}
                                 </span>
-                                <span className="text-[8px] font-black tracking-widest uppercase text-blue-400 animate-pulse bg-blue-500/10 px-1.5 py-0.5 rounded">
+                                <span className="text-[10px] font-black tracking-widest uppercase text-blue-300 animate-pulse bg-blue-500/25 px-2 py-1 rounded border border-blue-400/10">
                                   IN GAME
                                 </span>
                               </div>
-                              <div className="h-0.5 w-[30%] rounded-full bg-blue-400" />
+                              <div className="h-0.5 w-[50%] rounded-full bg-blue-400" />
                             </motion.div>
                           );
                         })}
@@ -659,29 +659,29 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
                                 exit={{ opacity: 0, scale: 0.95 }}
                                 transition={{ type: "spring", stiffness: 350, damping: 25 }}
                                 key={`survivor-${p.id}`}
-                                className={`p-2 rounded-lg border transition-all duration-300 flex flex-col justify-between gap-1 relative overflow-hidden ${
+                                className={`p-3.5 rounded-xl border transition-all duration-300 flex flex-col justify-between gap-2.5 relative overflow-hidden ${
                                   isWinner ? 'bg-gradient-to-br from-yellow-500/25 to-amber-600/15 border-yellow-400 shadow-[0_0_15px_rgba(251,191,36,0.25)] ring-1 ring-yellow-400/40' :
-                                  'bg-emerald-500/5 border-emerald-500/30'
+                                  'bg-emerald-500/10 border-emerald-500/40'
                                 }`}
                               >
-                                <div className="min-w-0 flex-1 py-0.5">
-                                  <p className={`text-[10px] font-bold truncate ${
-                                    isWinner ? 'text-yellow-200' : 'text-emerald-400'
+                                <div className="min-w-0 flex-1">
+                                  <p className={`text-xs md:text-sm font-extrabold truncate ${
+                                    isWinner ? 'text-yellow-250 font-black' : 'text-emerald-300'
                                   }`}>
                                     {p.name}
                                   </p>
                                 </div>
-                                <div className="flex items-center justify-between gap-1.5 min-w-0">
-                                  <span className={`font-mono font-black text-xs px-2 py-0.5 rounded shrink-0 ${
-                                    isWinner ? 'bg-yellow-400 text-slate-900 shadow-sm font-bold' :
-                                    'bg-emerald-500/20 text-white border border-emerald-500/10'
+                                <div className="flex items-center justify-between gap-2 min-w-0">
+                                  <span className={`font-mono font-black text-xs md:text-sm px-2.5 py-1 rounded shrink-0 ${
+                                    isWinner ? 'bg-yellow-400 text-slate-900 shadow-sm font-bold animate-pulse' :
+                                    'bg-emerald-500/20 text-white border border-emerald-500/20'
                                   }`}>
                                     ID {p.id}
                                   </span>
                                   
-                                  <span className={`text-[8px] font-black tracking-widest uppercase px-1.5 py-0.5 rounded shrink-0 ${
-                                    isWinner ? 'text-yellow-400 animate-bounce' :
-                                    'text-emerald-400 bg-emerald-500/10 font-bold border border-emerald-500/15'
+                                  <span className={`text-[10px] font-black tracking-widest uppercase px-2 py-0.5 rounded shrink-0 ${
+                                    isWinner ? 'text-yellow-400 animate-bounce bg-yellow-400/10 border border-yellow-400/20' :
+                                    'text-emerald-400 bg-emerald-500/15 font-bold border border-emerald-500/20'
                                   }`}>
                                     {isWinner ? '👑 WINNER' : 'STAY'}
                                   </span>
@@ -720,22 +720,22 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
                                 exit={{ opacity: 0, scale: 0.95 }}
                                 transition={{ type: "spring", stiffness: 350, damping: 25 }}
                                 key={`eliminated-${p.id}`}
-                                className="p-2 rounded-lg border border-red-900/10 bg-red-950/10 opacity-30 select-none flex flex-col justify-between gap-1 relative overflow-hidden"
+                                className="p-3 rounded-xl border border-red-900/20 bg-red-950/15 opacity-40 select-none flex flex-col justify-between gap-2 relative overflow-hidden"
                               >
-                                <div className="min-w-0 flex-1 py-0.5">
-                                  <p className="text-[10px] text-stone-400 line-through truncate font-normal">
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-xs md:text-sm text-stone-400 line-through truncate font-medium">
                                     {p.name}
                                   </p>
                                 </div>
-                                <div className="flex items-center justify-between gap-1.5 min-w-0">
-                                  <span className="font-mono font-black text-xs px-2 py-0.5 rounded shrink-0 bg-slate-800 text-stone-400 line-through">
+                                <div className="flex items-center justify-between gap-2 min-w-0">
+                                  <span className="font-mono font-black text-xs md:text-sm px-2 py-0.5 rounded shrink-0 bg-slate-800 text-stone-400 line-through border border-stone-700/20">
                                     ID {p.id}
                                   </span>
-                                  <span className="text-[8px] font-black tracking-widest uppercase px-1.5 py-0.5 rounded shrink-0 text-red-500/80 bg-red-500/5 border border-red-500/10">
+                                  <span className="text-[10px] font-black tracking-widest uppercase px-2 py-0.5 rounded shrink-0 text-red-400 bg-red-500/10 border border-red-500/20">
                                     OUT
                                   </span>
                                 </div>
-                                <div className="h-0.5 w-full bg-red-900/10 rounded-full" />
+                                <div className="h-0.5 w-full bg-red-900/20 rounded-full" />
                               </motion.div>
                             ))}
                         </AnimatePresence>

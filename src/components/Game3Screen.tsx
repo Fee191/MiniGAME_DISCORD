@@ -306,11 +306,11 @@ export default function Game3Screen({ state, setState }: Game3ScreenProps) {
 const Stickman = ({ player, facingRight, action }: { player: Player, facingRight: boolean, action: 'idle' | 'attack' | 'die' | 'win' }) => {
   return (
     <motion.div 
-      className="flex flex-col items-center"
+      className="flex flex-col items-center justify-end relative"
       animate={
-        action === 'attack' ? { x: facingRight ? 30 : -30, rotate: facingRight ? 20 : -20 } :
-        action === 'die' ? { opacity: 0, rotate: facingRight ? -90 : 90, y: 40, x: facingRight ? -20 : 20 } :
-        action === 'win' ? { y: [0, -20, 0] } :
+        action === 'attack' ? { x: facingRight ? 45 : -45, rotate: facingRight ? 20 : -20 } :
+        action === 'die' ? { opacity: 0, rotate: facingRight ? -90 : 90, y: 50, x: facingRight ? -30 : 30 } :
+        action === 'win' ? { y: [0, -30, 0] } :
         { x: 0, y: 0, rotate: 0, opacity: 1 }
       }
       transition={{ 
@@ -318,13 +318,13 @@ const Stickman = ({ player, facingRight, action }: { player: Player, facingRight
         repeat: action === 'win' ? Infinity : 0
       }}
     >
-      <div className="flex flex-col items-center mb-2 bg-gray-900/80 px-2.5 py-1 rounded border border-gray-700 text-center select-none w-28">
+      <div className="flex flex-col items-center mb-3 bg-gray-950/95 px-3.5 py-2 rounded-xl border-2 border-gray-700 text-center select-none w-36 md:w-40 shadow-xl z-20">
         {player.name && player.name !== player.id && (
-          <span className="text-[10px] text-gray-300 font-bold leading-none truncate w-full mb-1">{player.name}</span>
+          <span className="text-xs text-gray-200 font-extrabold leading-tight truncate w-full mb-1">{player.name}</span>
         )}
-        <span className="text-xs font-mono font-bold text-white">ID {player.id}</span>
+        <span className="text-sm font-mono font-black text-white">ID {player.id}</span>
       </div>
-      <svg width="60" height="60" viewBox="0 0 50 50" className={facingRight ? '' : 'scale-x-[-1]'}>
+      <svg width="100" height="100" viewBox="0 0 50 50" className={facingRight ? '' : 'scale-x-[-1]'}>
         <circle cx="25" cy="10" r="6" stroke="white" strokeWidth="2.5" fill={action === 'die' ? 'red' : 'none'} />
         <line x1="25" y1="16" x2="25" y2="32" stroke="white" strokeWidth="2.5" />
         <line x1="25" y1="22" x2="12" y2="28" stroke="white" strokeWidth="2.5" />
@@ -464,7 +464,7 @@ const TournamentView = ({
           const p2Action = isFighting ? 'attack' : (result === 0 ? 'die' : 'idle');
 
           return (
-            <div key={idx} className="bg-gray-900/60 p-6 rounded-xl border border-gray-700 flex justify-between items-center h-48 relative">
+            <div key={idx} className="bg-gray-900/60 p-6 rounded-2xl border border-gray-750 flex justify-between items-center min-h-[240px] relative shadow-lg">
               <div className="flex-1 flex justify-center">
                 <Stickman player={pair[0]} facingRight={true} action={p1Action} />
               </div>
