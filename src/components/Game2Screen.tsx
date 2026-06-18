@@ -224,12 +224,12 @@ export default function Game2Screen({ state, setState }: Game2ScreenProps) {
     return (
       <div className="h-screen w-screen flex flex-col items-center justify-center bg-black text-white relative z-[100]">
         <Trophy className="w-24 h-24 text-yellow-400 mb-8 animate-bounce" />
-        <h1 className="text-4xl font-bold mb-8">Đã trao hết giải thưởng!</h1>
+        <h1 className="text-4xl font-bold mb-8">All prizes have been awarded!</h1>
         <button
           onClick={() => setState(s => ({ ...s, view: 'result' }))}
           className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xl py-4 px-12 rounded-xl shadow-lg transition-all"
         >
-          XEM KẾT QUẢ
+          VIEW RESULTS
         </button>
       </div>
     );
@@ -332,6 +332,61 @@ export default function Game2Screen({ state, setState }: Game2ScreenProps) {
           
           {/* Finish Line */}
           <div className="absolute right-[8%] top-0 bottom-0 w-8 bg-[repeating-linear-gradient(45deg,#fff,#fff_10px,#000_10px,#000_20px)] z-0 border-l-4 border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.4)]" />
+
+          {/* Winner Track Overlay integrated within the Track panel */}
+          <AnimatePresence>
+            {raceState === 'finished' && currentWinner && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-black/90 backdrop-blur-md z-30 flex items-center justify-center p-4"
+              >
+                <motion.div
+                  initial={{ scale: 0.9, y: 15 }}
+                  animate={{ scale: 1, y: 0 }}
+                  className="bg-gradient-to-b from-slate-900 to-black border border-yellow-500/30 p-5 md:p-6 rounded-2xl shadow-[0_0_40px_rgba(234,179,8,0.2)] max-w-md w-full text-center relative overflow-hidden"
+                >
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-yellow-400 to-transparent" />
+                  
+                  <div className="text-5xl md:text-6xl mb-2.5 filter drop-shadow-md">
+                    {currentWinner.animal}
+                  </div>
+                  
+                  <h3 className="text-lg md:text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-600 uppercase tracking-widest mb-0.5">
+                    CHAMPION
+                  </h3>
+                  
+                  <p className="text-xs text-white/50 mb-4">
+                    Won <span className="text-yellow-400 font-bold">{currentPrize.name}</span>
+                  </p>
+
+                  <div className="bg-white/5 border border-white/5 rounded-xl p-3 inline-block min-w-[200px] mb-5">
+                    <p className="text-[9px] text-white/40 uppercase tracking-widest mb-0.5 font-bold">WINNER</p>
+                    <p className="text-lg font-mono font-black text-white tracking-wider truncate leading-tight">{currentWinner.id}</p>
+                    <p className="text-sm font-bold text-yellow-400 truncate mt-0.5">
+                      {playerMap[currentWinner.id] || currentWinner.id}
+                    </p>
+                  </div>
+
+                  <div className="flex justify-center gap-2.5">
+                    <button
+                      onClick={acceptWinner}
+                      className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-2.5 px-5 rounded-full shadow-[0_4px_12px_rgba(16,185,129,0.25)] transition-transform hover:scale-105 flex items-center justify-center gap-1.5 uppercase tracking-wide"
+                    >
+                      <CheckCircle className="w-4 h-4" /> ACCEPT
+                    </button>
+                    <button
+                      onClick={rejectWinner}
+                      className="bg-red-650 hover:bg-red-600 text-white font-bold text-xs py-2.5 px-5 rounded-full shadow-[0_4px_12px_rgba(220,38,38,0.25)] transition-transform hover:scale-105 flex items-center justify-center gap-1.5 uppercase tracking-wide border border-red-500/10"
+                    >
+                      <XSquare className="w-4 h-4" /> REJECT & RE-RUN
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <div className="flex-1 flex flex-col justify-around py-2 relative z-10">
             <AnimatePresence>
@@ -481,61 +536,6 @@ export default function Game2Screen({ state, setState }: Game2ScreenProps) {
           </div>
         </div>
       </div>
-
-      {/* Winner Overlay */}
-      <AnimatePresence>
-        {raceState === 'finished' && currentWinner && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.8, y: 50 }}
-              animate={{ scale: 1, y: 0 }}
-              className="bg-gradient-to-b from-gray-900 to-black border-2 border-yellow-500/50 p-8 md:p-10 rounded-3xl shadow-[0_0_100px_rgba(234,179,8,0.3)] max-w-2xl w-full text-center relative overflow-hidden"
-            >
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-yellow-400 to-transparent" />
-              
-              <div className="text-7xl md:text-8xl mb-6 drop-shadow-[0_0_30px_rgba(255,255,255,0.3)] filter">
-                {currentWinner.animal}
-              </div>
-              
-              <h3 className="text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-600 uppercase tracking-widest mb-2">
-                CHAMPION
-              </h3>
-              
-              <p className="text-lg md:text-xl text-white/60 mb-8 font-medium">
-                Won <span className="text-yellow-400 font-bold">{currentPrize.name}</span>
-              </p>
-
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 md:p-6 inline-block min-w-[250px] md:min-w-[300px]">
-                <p className="text-xs md:text-sm text-white/40 uppercase tracking-widest mb-2 font-bold">WINNER</p>
-                <p className="text-3xl md:text-4xl font-mono font-black text-white tracking-wider truncate">{currentWinner.id}</p>
-                <p className="text-xl md:text-2xl font-bold text-yellow-400 truncate mt-1">
-                  {playerMap[currentWinner.id] || currentWinner.id}
-                </p>
-              </div>
-
-              <div className="mt-8 md:mt-10 flex flex-col md:flex-row justify-center gap-4">
-                <button
-                  onClick={acceptWinner}
-                  className="bg-green-600 hover:bg-green-500 text-white font-bold text-lg md:text-xl py-3 px-8 md:py-4 md:px-12 rounded-full shadow-[0_0_40px_rgba(22,163,74,0.4)] transition-transform hover:scale-105 flex items-center justify-center gap-3"
-                >
-                  <CheckCircle className="w-5 h-5 md:w-6 md:h-6" /> CHẤP NHẬN
-                </button>
-                <button
-                  onClick={rejectWinner}
-                  className="bg-red-600 hover:bg-red-500 text-white font-bold text-lg md:text-xl py-3 px-8 md:py-4 md:px-12 rounded-full shadow-[0_0_40px_rgba(220,38,38,0.4)] transition-transform hover:scale-105 flex items-center justify-center gap-3"
-                >
-                  <XSquare className="w-5 h-5 md:w-6 md:h-6" /> HỦY KẾT QUẢ
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Custom Confirm Modal */}
       <AnimatePresence>

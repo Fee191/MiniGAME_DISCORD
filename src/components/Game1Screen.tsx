@@ -236,12 +236,12 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
     return (
       <div className="h-screen w-screen flex flex-col items-center justify-center bg-slate-900 text-white relative z-[100]">
         <Trophy className="w-24 h-24 text-yellow-400 mb-8 animate-bounce" />
-        <h1 className="text-4xl font-bold mb-8">Đã trao hết giải thưởng!</h1>
+        <h1 className="text-4xl font-bold mb-8">All prizes have been drawn!</h1>
         <button
           onClick={() => setState(s => ({ ...s, view: 'result' }))}
           className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xl py-4 px-12 rounded-xl shadow-lg transition-all"
         >
-          XEM KẾT QUẢ
+          VIEW RESULTS
         </button>
       </div>
     );
@@ -331,16 +331,16 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <div className="flex-1 w-full flex flex-col lg:flex-row gap-6 pt-20 md:pt-24 pb-4 relative z-10 min-h-0 max-w-7xl mx-auto overflow-hidden">
+      <div className="flex-1 w-full flex flex-col lg:flex-row gap-4 pt-16 md:pt-18 pb-2 relative z-10 min-h-0 max-w-7xl mx-auto overflow-hidden">
         
         {/* Left Column: Lottery Machine, Title, Prize & Controller Card */}
-        <div className="w-full lg:w-[48%] flex flex-col items-center justify-between gap-4 min-h-0 shrink-0">
+        <div className="w-full lg:w-[48%] flex flex-col items-center justify-between gap-3 min-h-0 shrink-0">
           
           {/* Event and Prize Header */}
-          <div className="w-full text-center space-y-3">
+          <div className="w-full text-center space-y-1">
             <h1 
-              className="text-3xl md:text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 via-yellow-400 to-yellow-600 uppercase tracking-widest drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] leading-tight max-w-full"
-              style={{ textWrap: 'balance' }}
+              className="text-2xl md:text-3xl lg:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 via-yellow-400 to-yellow-600 uppercase tracking-widest drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] leading-tight max-w-full truncate"
+              title={state.eventName}
             >
               {state.eventName}
             </h1>
@@ -348,30 +348,30 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
             <motion.div 
               initial={{ y: -10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              className="bg-slate-900/70 backdrop-blur-md rounded-2xl border border-white/10 p-4 shadow-xl text-center space-y-1 w-full max-w-xl mx-auto"
+              className="bg-slate-900/70 backdrop-blur-md rounded-xl border border-white/10 p-2.5 md:p-3 shadow-md text-center space-y-0.5 w-full max-w-xl mx-auto"
             >
-              <div className="inline-flex items-center gap-2 bg-blue-900/40 text-blue-300 px-3.5 py-1 rounded-full text-xs font-bold tracking-widest uppercase border border-blue-500/20">
-                ⭐ GIẢI ĐANG QUAY: GIẢI {currentPrizeIndex + 1} / {state.prizes.length}
+              <div className="inline-flex items-center gap-1.5 bg-blue-900/40 text-blue-300 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase border border-blue-500/20">
+                ⭐ DRAWING PRIZE: {currentPrizeIndex + 1} / {state.prizes.length}
               </div>
-              <h2 className="text-2xl md:text-3xl font-black text-white uppercase tracking-wide truncate">
+              <h2 className="text-lg md:text-xl font-black text-white uppercase tracking-wide truncate">
                 {currentPrize.name}
               </h2>
-              <p className="text-sm md:text-base font-medium text-blue-300 line-clamp-2">
+              <p className="text-xs md:text-sm font-medium text-blue-300 line-clamp-1">
                 {currentPrize.content}
               </p>
             </motion.div>
           </div>
 
           {/* Lottery Draw Visualization Board */}
-          <div className="relative w-full max-w-xl mx-auto flex-1 flex flex-col justify-center min-h-[220px]">
+          <div className="relative w-full max-w-xl mx-auto flex-1 flex flex-col justify-center min-h-[160px]">
             <motion.div
               animate={phase === 'spinning_code' || phase === 'eliminating' ? { y: [-2, 2, -2] } : {}}
               transition={{ repeat: Infinity, duration: 0.1 }}
               className={`
-                relative overflow-hidden rounded-2xl border-2 flex flex-col items-center justify-center min-h-[200px] w-full p-6 shadow-2xl backdrop-blur-sm transition-colors duration-300
+                relative overflow-hidden rounded-2xl border flex flex-col items-center justify-center min-h-[150px] w-full p-4 shadow-xl backdrop-blur-sm transition-colors duration-300
                 ${phase === 'idle' ? 'bg-slate-900/80 border-white/10' : ''}
-                ${phase === 'spinning_code' || phase === 'eliminating' ? 'bg-blue-900/80 border-blue-400 shadow-[0_0_30px_rgba(59,130,246,0.3)]' : ''}
-                ${phase === 'tied' || phase === 'revealed' ? 'bg-emerald-950/80 border-emerald-400 shadow-[0_0_30px_rgba(52,211,153,0.3)]' : ''}
+                ${phase === 'spinning_code' || phase === 'eliminating' ? 'bg-blue-900/80 border-blue-400 shadow-[0_0_20px_rgba(59,130,246,0.3)]' : ''}
+                ${phase === 'tied' || phase === 'revealed' ? 'bg-emerald-950/80 border-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.3)]' : ''}
               `}
             >
               <div className="relative z-10 text-center w-full">
@@ -379,68 +379,68 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
                   <motion.div 
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="flex flex-col items-center gap-3 text-white/40"
+                    className="flex flex-col items-center gap-1.5 text-white/40"
                   >
-                    <Ticket className="w-12 h-12 text-blue-400 animate-pulse" />
-                    <p className="text-sm font-bold tracking-widest uppercase text-blue-300/60">READY TO DRAW</p>
-                    <div className="text-7xl font-black font-mono tracking-widest text-white/15 select-none">
+                    <Ticket className="w-10 h-10 text-blue-400 animate-pulse" />
+                    <p className="text-[10px] font-bold tracking-widest uppercase text-blue-300/60">READY TO DRAW</p>
+                    <div className="text-6xl font-black font-mono tracking-widest text-white/10 select-none leading-none">
                       ??
                     </div>
                   </motion.div>
                 )}
 
                 {phase === 'spinning_code' && (
-                  <div className="space-y-2">
-                    <p className="font-bold text-sm tracking-widest uppercase text-blue-300 animate-pulse">
-                      ĐANG QUAY 2 CHỮ SỐ MAY MẮN...
+                  <div className="space-y-1">
+                    <p className="font-bold text-xs tracking-widest uppercase text-blue-300 animate-pulse">
+                      SPINNING LUCKY DIGITS...
                     </p>
-                    <div className="text-7xl md:text-8xl font-black tracking-widest text-yellow-400 font-mono drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]">
+                    <div className="text-6xl md:text-7xl font-black tracking-widest text-yellow-400 font-mono drop-shadow-[0_0_12px_rgba(250,204,21,0.5)] leading-none">
                       {displayText}
                     </div>
                   </div>
                 )}
 
                 {phase === 'eliminating' && (
-                  <div className="space-y-3">
-                    <p className="font-bold text-xs tracking-widest uppercase text-red-300 animate-pulse">
-                      ĐANG THANH LỌC 1/2 SỐ ỨNG VIÊN...
+                  <div className="space-y-1.5">
+                    <p className="font-bold text-[10px] tracking-widest uppercase text-red-300 animate-pulse">
+                      ELIMINATING 1/2 OF THE CANDIDATES...
                     </p>
-                    <div className="text-6xl md:text-7xl font-black tracking-widest text-red-500 font-mono drop-shadow-[0_0_15px_rgba(239,68,68,0.5)]">
+                    <div className="text-5xl md:text-6xl font-black tracking-widest text-red-500 font-mono drop-shadow-[0_0_12px_rgba(239,68,68,0.5)] leading-none">
                       {displayText}
                     </div>
-                    <div className="text-xs font-semibold text-white/50 bg-red-950/40 py-1 px-3 rounded-full inline-block border border-red-500/20">
-                      Vòng Thanh Lọc Thải Trừ Thứ {eliminationRound + 1}
+                    <div className="text-[10px] font-semibold text-white/50 bg-red-950/40 py-0.5 px-2.5 rounded-full inline-block border border-red-500/20">
+                      Elimination Round Stage {eliminationRound + 1}
                     </div>
                   </div>
                 )}
 
                 {phase === 'tied' && (
-                  <div className="space-y-3 w-full">
-                    <span className="text-xs font-bold tracking-widest uppercase text-yellow-400 bg-yellow-400/10 px-3.5 py-1 rounded-full border border-yellow-500/20">
-                      CON SỐ MAY MẮN: {targetCode}
+                  <div className="space-y-2 w-full">
+                    <span className="text-[10px] font-bold tracking-widest uppercase text-yellow-400 bg-yellow-400/10 px-3 py-0.5 rounded-full border border-yellow-500/20">
+                      LUCKY DIGITS: {targetCode}
                     </span>
-                    <h3 className="text-2xl font-black text-white uppercase tracking-wider">
-                      VÒNG LOẠI {eliminationRound > 0 ? `THÀNH VIÊN TIER ${eliminationRound}` : 'BAN ĐẦU'}
+                    <h3 className="text-xl font-black text-white uppercase tracking-wider leading-none mt-1">
+                      ROUND {eliminationRound > 0 ? `STAGE ${eliminationRound}` : 'INITIAL ELIMINATION'}
                     </h3>
-                    <p className="text-sm font-semibold tracking-wide text-emerald-400">
-                      Còn giữ lại {survivingPlayers.length} trong tổng {tiedPlayers.length} ứng viên có mã ID chứa "{targetCode}"
+                    <p className="text-xs font-semibold tracking-wide text-emerald-400">
+                      Surviving {survivingPlayers.length} out of {tiedPlayers.length} matches containing "{targetCode}"
                     </p>
                   </div>
                 )}
 
                 {phase === 'revealed' && winner && (
-                  <div className="space-y-3 animate-fade-in">
-                    <p className="font-bold text-xs tracking-widest uppercase text-yellow-400 bg-yellow-400/10 px-3 py-1 rounded-full border border-yellow-500/20 inline-block animate-bounce">
-                      👑 CHỦ NHÂN ĐOẠT GIẢI DUY NHẤT 👑
+                  <div className="space-y-2 animate-fade-in">
+                    <p className="font-bold text-[10px] tracking-widest uppercase text-yellow-400 bg-yellow-400/10 px-2.5 py-0.5 rounded-full border border-yellow-500/20 inline-block animate-bounce">
+                      👑 SOLE PRIZE WINNER 👑
                     </p>
-                    <div className="text-6xl font-black tracking-wider text-white drop-shadow-xl font-mono">
+                    <div className="text-5xl font-black tracking-wider text-white drop-shadow-lg font-mono leading-none">
                       {winner.id}
                     </div>
-                    <div className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 drop-shadow-md truncate px-4">
+                    <div className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 drop-shadow-md truncate px-4 leading-normal">
                       {winner.name}
                     </div>
-                    <div className="mt-2 text-white/40 text-xs font-medium max-w-sm mx-auto">
-                      Đăng quang vinh quang sau {eliminationRound} vòng thanh lọc căng thẳng của mã {targetCode}!
+                    <div className="text-white/40 text-[10px] font-medium max-w-sm mx-auto">
+                      Won after {eliminationRound} stages of fierce filtering for code {targetCode}!
                     </div>
                   </div>
                 )}
@@ -449,7 +449,7 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
           </div>
 
           {/* Action Button Controls */}
-          <div className="h-16 w-full flex items-center justify-center shrink-0">
+          <div className="h-14 w-full flex items-center justify-center shrink-0">
             <AnimatePresence mode="wait">
               {phase === 'idle' && (
                 <motion.button
@@ -460,9 +460,9 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleSpinCode}
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-505 text-white font-extrabold text-lg py-4 px-10 rounded-2xl shadow-[0_4px_20px_rgba(59,130,246,0.3)] flex items-center gap-3 tracking-widest uppercase transition-all"
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-550 text-white font-extrabold text-sm py-3 px-8 rounded-xl shadow-[0_4px_15px_rgba(59,130,246,0.25)] flex items-center gap-2.5 tracking-widest uppercase transition-all"
                 >
-                  QUAY SỐ MAY MẮN
+                  DRAW LUCKY NUMBER
                 </motion.button>
               )}
 
@@ -475,16 +475,16 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleEliminateHalf}
-                  className="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-extrabold text-base py-3.5 px-8 rounded-2xl shadow-[0_4px_20px_rgba(239,68,68,0.3)] flex items-center gap-2.5 tracking-wider uppercase transition-all"
+                  className="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-extrabold text-xs py-3 px-6 rounded-xl shadow-[0_4px_15px_rgba(239,68,68,0.25)] flex items-center gap-2 tracking-wider uppercase transition-all"
                 >
                   {survivingPlayers.length > 2 
-                    ? `TIẾN HÀNH THẢI TRỪ 1/2 (${survivingPlayers.length} người)` 
-                    : 'QUAY CHUNG KẾT (1 VỌI 1)'}
+                    ? `ELIMINATE 1/2 (${survivingPlayers.length} REMAINING)` 
+                    : 'RUN FINAL SHOWDOWN (1 VS 1)'}
                 </motion.button>
               )}
 
               {phase === 'revealed' && (
-                <div className="flex gap-4 w-full max-w-md">
+                <div className="flex gap-3 w-full max-w-sm">
                   <motion.button
                     key="accept-btn"
                     initial={{ opacity: 0, y: 15 }}
@@ -492,9 +492,9 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
                     onClick={acceptWinner}
-                    className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-base py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-lg uppercase tracking-wider"
+                    className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-md uppercase tracking-wider"
                   >
-                    <CheckCircle className="w-5 h-5" /> CHẤP NHẬN
+                    <CheckCircle className="w-4 h-4" /> ACCEPT RESULTS
                   </motion.button>
                   <motion.button
                     key="reject-btn"
@@ -503,9 +503,9 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
                     onClick={rejectWinner}
-                    className="flex-1 bg-slate-800 hover:bg-slate-700 text-white/90 font-bold text-base py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-md uppercase tracking-wider border border-white/10"
+                    className="flex-1 bg-slate-850 hover:bg-slate-800 text-white/95 font-bold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-sm uppercase tracking-wider border border-white/10"
                   >
-                    <XSquare className="w-5 h-5" /> HỦY KẾT QUẢ
+                    <XSquare className="w-4 h-4" /> REJECT & REDRAW
                   </motion.button>
                 </div>
               )}
@@ -514,40 +514,40 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
         </div>
 
         {/* Right Column: Dynamic Player Arena Panel */}
-        <div className="flex-1 w-full bg-slate-950/60 backdrop-blur-md rounded-3xl border border-white/15 p-4 md:p-6 flex flex-col min-h-0 overflow-hidden shadow-2xl">
+        <div className="flex-1 w-full bg-slate-950/60 backdrop-blur-md rounded-2xl border border-white/10 p-3 md:p-4 flex flex-col min-h-0 overflow-hidden shadow-xl">
           
           {/* Header & Status Metrics for Right Panel */}
-          <div className="flex items-center justify-between gap-4 pb-4 border-b border-white/10 mb-4 shrink-0">
-            <div className="flex items-center gap-2.5">
-              <span className="p-2 bg-blue-500/10 rounded-xl text-blue-400 border border-blue-500/20">
-                <Users className="w-5 h-5" />
+          <div className="flex items-center justify-between gap-2 pb-3 border-b border-white/5 mb-3 shrink-0">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="p-1.5 bg-blue-500/10 rounded-lg text-blue-400 border border-blue-500/10 shrink-0">
+                <Users className="w-4 h-4" />
               </span>
-              <div>
-                <h3 className="text-lg font-black text-white tracking-wide uppercase">
+              <div className="min-w-0">
+                <h3 className="text-sm font-black text-white tracking-wider uppercase truncate">
                   {phase === 'idle' || phase === 'spinning_code' 
-                    ? 'DANH SÁCH THAM GIA VÒNG QUAY' 
-                    : 'KHÁN ĐÀI ĐẤU TRƯỜNG CHUNG KẾT'}
+                    ? 'QUALIFIED PARTICIPANTS' 
+                    : 'ELIMINATION ARENA'}
                 </h3>
-                <p className="text-xs text-white/50 tracking-wider">
+                <p className="text-[10px] text-white/40 tracking-wide truncate">
                   {phase === 'idle' || phase === 'spinning_code'
-                    ? `Tất cả nguồn người chơi hợp lệ còn lại trong hệ thống`
-                    : `Đấu trường thanh lọc từ con số may mắn "${targetCode}"`}
+                    ? `Remaining eligible active participants in pool`
+                    : `Active survival pool filtered by: "${targetCode}"`}
                 </p>
               </div>
             </div>
             
             {/* Realtime stats badge */}
-            <div className="bg-slate-900/90 border border-white/10 px-3 py-1.5 rounded-xl flex items-center gap-3 font-mono text-xs">
+            <div className="bg-slate-900/90 border border-white/5 px-2 py-1 rounded-lg flex items-center gap-2 font-mono text-[10px] shrink-0">
               {phase === 'idle' || phase === 'spinning_code' ? (
                 <>
-                  <span className="text-white/65">TỔNG SỐ:</span>
-                  <span className="text-blue-400 font-bold text-sm">{remainingPlayers.length}</span>
+                  <span className="text-white/40">TOTAL:</span>
+                  <span className="text-blue-400 font-bold">{remainingPlayers.length}</span>
                 </>
               ) : (
                 <>
-                  <span className="text-emerald-400 font-bold py-0.5 px-1 bg-emerald-500/10 rounded">BÁM TRỤ: {survivingPlayers.length}</span>
-                  <span className="text-white/30">|</span>
-                  <span className="text-red-400 font-bold py-0.5 px-1 bg-red-500/10 rounded">SÀNG LỌC: {tiedPlayers.length - survivingPlayers.length}</span>
+                  <span className="text-emerald-400 font-bold">ALIVE: {survivingPlayers.length}</span>
+                  <span className="text-white/20">|</span>
+                  <span className="text-red-400 font-bold">ELI: {tiedPlayers.length - survivingPlayers.length}</span>
                 </>
               )}
             </div>
@@ -558,21 +558,21 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
             {phase === 'idle' || phase === 'spinning_code' ? (
               /* DENSE CHIP VIEW for ALL ACTIVE PLAYERS */
               remainingPlayers.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center p-8 text-white/30 text-center gap-2">
-                  <Users className="w-12 h-12 stroke-[1.5]" />
-                  <p className="italic">Không còn người chơi nào khả dụng để quay thưởng.</p>
+                <div className="h-full flex flex-col items-center justify-center p-6 text-white/30 text-center gap-1.5">
+                  <Users className="w-10 h-10 stroke-[1.5]" />
+                  <p className="italic text-xs">No active players left to draw.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-3 gap-2 p-1">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-3 gap-1.5 p-0.5">
                   {remainingPlayers.map(p => (
                     <div 
                       key={p.id} 
-                      className="bg-slate-900/40 border border-white/5 p-2 rounded-xl flex items-center gap-2 hover:border-white/15 transition-all w-full min-w-0"
+                      className="bg-slate-900/30 border border-white/5 p-1.5 rounded-lg flex items-center gap-1.5 hover:border-white/10 transition-all w-full min-w-0"
                     >
-                      <div className="w-7 h-7 bg-blue-500/10 rounded-lg flex items-center justify-center font-mono font-bold text-xs text-blue-300 shrink-0 border border-blue-500/10">
+                      <div className="w-6 h-6 bg-blue-500/10 rounded flex items-center justify-center font-mono font-bold text-[10px] text-blue-300 shrink-0 border border-blue-500/10">
                         {p.id}
                       </div>
-                      <p className="text-xs font-semibold text-white/80 truncate flex-1 min-w-0">{p.name}</p>
+                      <p className="text-[10px] font-bold text-white/80 truncate flex-1 min-w-0">{p.name}</p>
                     </div>
                   ))}
                 </div>
@@ -580,12 +580,12 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
             ) : (
               /* DUAL-STATE ACTIVE/ELIMINATED VISUAL CONTAINER */
               tiedPlayers.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center p-8 text-white/30 text-center gap-2">
-                  <Ticket className="w-12 h-12 stroke-[1.5]" />
-                  <p className="italic">Không tìm thấy mã khớp. Hãy nhấn hủy hoặc quay lại.</p>
+                <div className="h-full flex flex-col items-center justify-center p-6 text-white/30 text-center gap-1.5">
+                  <Ticket className="w-10 h-10 stroke-[1.5]" />
+                  <p className="italic text-xs">No matches found. Please click redraw.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-3 gap-3 p-1">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-3 gap-2.5 p-0.5">
                   <AnimatePresence>
                     {tiedPlayers.map(p => {
                       const isWinner = winner?.id === p.id;
@@ -594,40 +594,40 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
                       return (
                         <motion.div
                           layout
-                          initial={{ opacity: 0, scale: 0.92 }}
+                          initial={{ opacity: 0, scale: 0.95 }}
                           animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.92 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
                           transition={{ type: "spring", stiffness: 350, damping: 25 }}
                           key={`contestant-${p.id}`}
-                          className={`p-3 md:p-3.5 rounded-2xl border transition-all duration-300 flex flex-col justify-between gap-2.5 relative overflow-hidden ${
-                            isWinner ? 'bg-gradient-to-br from-yellow-500/25 to-amber-600/15 border-yellow-400 shadow-[0_0_20px_rgba(251,191,36,0.3)] ring-2 ring-yellow-400/40' :
-                            isAlive ? 'bg-emerald-500/10 border-emerald-500/45 shadow-[0_4px_12px_rgba(16,185,129,0.1)]' :
-                            'bg-red-950/15 border-red-900/10 opacity-30 select-none'
+                          className={`p-2.5 rounded-xl border transition-all duration-300 flex flex-col justify-between gap-1.5 relative overflow-hidden ${
+                            isWinner ? 'bg-gradient-to-br from-yellow-500/25 to-amber-600/15 border-yellow-400 shadow-[0_0_15px_rgba(251,191,36,0.25)] ring-1 ring-yellow-400/40' :
+                            isAlive ? 'bg-emerald-500/10 border-emerald-500/40 shadow-[0_3px_8px_rgba(16,185,129,0.08)]' :
+                            'bg-red-950/15 border-red-900/5 opacity-25 select-none'
                           }`}
                         >
                           {/* Top Tag Bar */}
-                          <div className="flex items-center justify-between gap-1.5 min-w-0">
-                            <span className={`font-mono font-black text-xs px-2 py-0.5 rounded-lg shrink-0 ${
-                              isWinner ? 'bg-yellow-400 text-slate-900 shadow-md' :
+                          <div className="flex items-center justify-between gap-1 min-w-0">
+                            <span className={`font-mono font-black text-[9px] px-1.5 py-0.5 rounded shrink-0 ${
+                              isWinner ? 'bg-yellow-400 text-slate-900 shadow-sm' :
                               isAlive ? 'bg-emerald-500/20 text-emerald-300' :
                               'bg-slate-800/50 text-slate-500 line-through'
                             }`}>
                               ID {p.id}
                             </span>
                             
-                            <span className={`text-[9px] font-black tracking-widest uppercase px-1.5 py-0.5 rounded shrink-0 ${
+                            <span className={`text-[8px] font-black tracking-widest uppercase px-1 py-0.5 rounded shrink-0 ${
                               isWinner ? 'text-yellow-400 animate-bounce' :
                               isAlive ? 'text-emerald-400 animate-pulse bg-emerald-500/5' :
                               'text-red-500/60 bg-red-500/5'
                             }`}>
-                              {isWinner ? '👑 THẮNG CỰC' : isAlive ? '● DỰ PHẦN' : 'LOẠI'}
+                              {isWinner ? '👑 WINNER' : isAlive ? '● STAY' : 'OUT'}
                             </span>
                           </div>
 
                           {/* Candidate info labels */}
                           <div className="min-w-0 flex-1">
-                            <p className={`text-xs md:text-sm font-extrabold truncate ${
-                              isWinner ? 'text-yellow-200' :
+                            <p className={`text-[11px] font-bold truncate ${
+                              isWinner ? 'text-yellow-250' :
                               isAlive ? 'text-white' :
                               'text-white/40 line-through font-normal'
                             }`}>
@@ -636,7 +636,7 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
                           </div>
 
                           {/* Soft colored indicator strip on bottom */}
-                          <div className={`h-1 w-full rounded-full ${
+                          <div className={`h-0.5 w-full rounded-full ${
                             isWinner ? 'bg-gradient-to-r from-yellow-400 to-amber-500' :
                             isAlive ? 'bg-emerald-500' :
                             'bg-red-900/10'

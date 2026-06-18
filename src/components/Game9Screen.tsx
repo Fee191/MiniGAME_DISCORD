@@ -761,13 +761,13 @@ export default function Game9Screen({ state, setState }: Game9ScreenProps) {
                   onClick={acceptWinner}
                   className="bg-green-600 text-white font-black px-12 py-5 rounded-2xl hover:bg-green-500 transition-all uppercase tracking-widest shadow-2xl flex items-center gap-3"
                 >
-                  <CheckCircle className="w-6 h-6" /> CHẤP NHẬN
+                  <CheckCircle className="w-6 h-6" /> ACCEPT
                 </button>
                 <button 
                   onClick={rejectWinner}
                   className="bg-red-600 text-white font-black px-12 py-5 rounded-2xl hover:bg-red-500 transition-all uppercase tracking-widest shadow-2xl flex items-center gap-3"
                 >
-                  <XSquare className="w-6 h-6" /> HỦY KẾT QUẢ
+                  <XSquare className="w-6 h-6" /> REJECT & RE-DRAW
                 </button>
               </div>
             )}
