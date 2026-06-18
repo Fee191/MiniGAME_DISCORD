@@ -433,11 +433,11 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
                     <p className="font-bold text-[10px] tracking-widest uppercase text-yellow-400 bg-yellow-400/10 px-2.5 py-0.5 rounded-full border border-yellow-500/20 inline-block animate-bounce">
                       👑 SOLE PRIZE WINNER 👑
                     </p>
-                    <div className="text-5xl font-black tracking-wider text-white drop-shadow-lg font-mono leading-none">
-                      {winner.id}
-                    </div>
-                    <div className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 drop-shadow-md truncate px-4 leading-normal">
+                    <div className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 drop-shadow-md truncate px-4 leading-none mb-1">
                       {winner.name}
+                    </div>
+                    <div className="text-4xl font-black tracking-wider text-white drop-shadow-lg font-mono leading-none">
+                      ID {winner.id}
                     </div>
                     <div className="text-white/40 text-[10px] font-medium max-w-sm mx-auto">
                       Won after {eliminationRound} stages of fierce filtering for code {targetCode}!

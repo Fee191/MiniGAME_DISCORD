@@ -69,8 +69,8 @@ const StickFigure = ({ color = "currentColor", size = 40, opacity = 1, isDead = 
           <div className="flex flex-col items-center">
             {name && !isScrambling && (showFullId || isDead || isWinner) && (
               <span className={`font-sans tracking-tight leading-none overflow-hidden text-ellipsis max-w-[120px] font-bold ${
-                largeId ? 'text-[9px] mb-0.5 text-stone-300' : 'text-[6px] mb-0.5 text-stone-400'
-              } ${isWinner ? 'text-slate-900 border-b border-slate-950/10 w-full pb-px mb-px' : ''}`}>
+                largeId ? 'text-[9px] mb-0.5' : 'text-[6px] mb-0.5'
+              } ${isWinner ? 'text-slate-950 border-b border-slate-950/20 w-full pb-px mb-px' : (largeId ? 'text-stone-300' : 'text-stone-400')}`}>
                 {name}
               </span>
             )}
