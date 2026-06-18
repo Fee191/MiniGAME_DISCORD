@@ -554,97 +554,198 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
           </div>
 
           {/* Grid View of Players */}
-          <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-1">
+          <div className="flex-1 min-h-0 flex flex-col">
             {phase === 'idle' || phase === 'spinning_code' ? (
               /* DENSE CHIP VIEW for ALL ACTIVE PLAYERS */
               remainingPlayers.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center p-6 text-white/30 text-center gap-1.5">
+                <div className="flex-1 flex flex-col items-center justify-center p-6 text-white/30 text-center gap-1.5">
                   <Users className="w-10 h-10 stroke-[1.5]" />
                   <p className="italic text-xs">No active players left to draw.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-3 gap-1.5 p-0.5">
-                  {remainingPlayers.map(p => (
-                    <div 
-                      key={p.id} 
-                      className="bg-slate-900/30 border border-white/5 p-1.5 rounded-lg flex items-center gap-1.5 hover:border-white/10 transition-all w-full min-w-0"
-                    >
-                      <div className="w-6 h-6 bg-blue-500/10 rounded flex items-center justify-center font-mono font-bold text-[10px] text-blue-300 shrink-0 border border-blue-500/10">
-                        {p.id}
+                <div className="flex-1 overflow-y-auto custom-scrollbar pr-1">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-3 gap-1.5 p-0.5">
+                    {remainingPlayers.map(p => (
+                      <div 
+                        key={p.id} 
+                        className="bg-slate-900/30 border border-white/5 p-1.5 rounded-lg flex items-center gap-1.5 hover:border-white/10 transition-all w-full min-w-0"
+                      >
+                        <div className="w-6 h-6 bg-blue-500/10 rounded flex items-center justify-center font-mono font-bold text-[10px] text-blue-300 shrink-0 border border-blue-500/10">
+                          {p.id}
+                        </div>
+                        <p className="text-[10px] font-bold text-white/80 truncate flex-1 min-w-0">{p.name}</p>
                       </div>
-                      <p className="text-[10px] font-bold text-white/80 truncate flex-1 min-w-0">{p.name}</p>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               )
             ) : (
-              /* DUAL-STATE ACTIVE/ELIMINATED VISUAL CONTAINER */
+              /* ACTIVE GAME LOTTERY MATCHES VIEW */
               tiedPlayers.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center p-6 text-white/30 text-center gap-1.5">
+                <div className="flex-1 flex flex-col items-center justify-center p-6 text-white/30 text-center gap-1.5">
                   <Ticket className="w-10 h-10 stroke-[1.5]" />
                   <p className="italic text-xs">No matches found. Please click redraw.</p>
                 </div>
+              ) : eliminationRound === 0 ? (
+                /* 1. SINGLE UNIFIED FRAME WHEN NEWLY DRAWN (ROUND 0) */
+                <div className="flex-1 flex flex-col bg-slate-950/40 border border-blue-500/20 rounded-xl p-3 min-h-0">
+                  <div className="flex items-center justify-between mb-2.5 pb-2 border-b border-blue-500/10">
+                    <div className="flex items-center gap-1.5 text-blue-400">
+                      <Ticket className="w-4 h-4 text-blue-400 animate-pulse bg-blue-500/5 rounded" />
+                      <span className="text-xs font-black tracking-wider uppercase">LUCKY DIGITS MATCHES ({tiedPlayers.length})</span>
+                    </div>
+                    <span className="text-[9px] bg-blue-500/10 border border-blue-500/20 text-blue-300 font-mono font-bold px-2 py-0.5 rounded-full">
+                      INITIAL POOL
+                    </span>
+                  </div>
+                  
+                  <div className="flex-1 overflow-y-auto custom-scrollbar pr-0.5">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 xl:grid-cols-3 gap-2">
+                      <AnimatePresence>
+                        {tiedPlayers.map(p => {
+                          const isWinner = winner?.id === p.id;
+                          return (
+                            <motion.div
+                              layout
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.95 }}
+                              key={`initial-match-${p.id}`}
+                              className="p-2 rounded-lg border border-blue-500/20 bg-blue-500/5 hover:bg-blue-500/10 transition-colors flex flex-col justify-between gap-1 relative overflow-hidden"
+                            >
+                              <div className="flex items-center justify-between gap-1 min-w-0">
+                                <span className="font-mono font-black text-[9px] px-1.5 py-0.5 rounded shrink-0 bg-blue-500/20 text-blue-300">
+                                  ID {p.id}
+                                </span>
+                                <span className="text-[8px] font-black tracking-widest uppercase text-blue-400 animate-pulse">
+                                  ● IN GAME
+                                </span>
+                              </div>
+                              <div className="min-w-0 flex-1 py-0.5">
+                                <p className="text-[11px] font-bold text-white truncate">
+                                  {p.name}
+                                </p>
+                              </div>
+                              <div className="h-0.5 w-[30%] rounded-full bg-blue-400" />
+                            </motion.div>
+                          );
+                        })}
+                      </AnimatePresence>
+                    </div>
+                  </div>
+                </div>
               ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-3 gap-2.5 p-0.5">
-                  <AnimatePresence>
-                    {tiedPlayers.map(p => {
-                      const isWinner = winner?.id === p.id;
-                      const isAlive = survivingPlayers.some(s => s.id === p.id);
-                      
-                      return (
-                        <motion.div
-                          layout
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                          key={`contestant-${p.id}`}
-                          className={`p-2.5 rounded-xl border transition-all duration-300 flex flex-col justify-between gap-1.5 relative overflow-hidden ${
-                            isWinner ? 'bg-gradient-to-br from-yellow-500/25 to-amber-600/15 border-yellow-400 shadow-[0_0_15px_rgba(251,191,36,0.25)] ring-1 ring-yellow-400/40' :
-                            isAlive ? 'bg-emerald-500/10 border-emerald-500/40 shadow-[0_3px_8px_rgba(16,185,129,0.08)]' :
-                            'bg-red-950/15 border-red-900/5 opacity-25 select-none'
-                          }`}
-                        >
-                          {/* Top Tag Bar */}
-                          <div className="flex items-center justify-between gap-1 min-w-0">
-                            <span className={`font-mono font-black text-[9px] px-1.5 py-0.5 rounded shrink-0 ${
-                              isWinner ? 'bg-yellow-400 text-slate-900 shadow-sm' :
-                              isAlive ? 'bg-emerald-500/20 text-emerald-300' :
-                              'bg-slate-800/50 text-slate-500 line-through'
-                            }`}>
-                              ID {p.id}
-                            </span>
-                            
-                            <span className={`text-[8px] font-black tracking-widest uppercase px-1 py-0.5 rounded shrink-0 ${
-                              isWinner ? 'text-yellow-400 animate-bounce' :
-                              isAlive ? 'text-emerald-400 animate-pulse bg-emerald-500/5' :
-                              'text-red-500/60 bg-red-500/5'
-                            }`}>
-                              {isWinner ? '👑 WINNER' : isAlive ? '● STAY' : 'OUT'}
-                            </span>
-                          </div>
+                /* 2. SPLIT ARENA: SURVIVORS VS ELIMINATED (ROUND > 0) */
+                <div className="flex-1 flex flex-col md:flex-row gap-3 min-h-0 overflow-hidden">
+                  
+                  {/* Surviving players frame */}
+                  <div className="flex-1 flex flex-col bg-slate-950/50 border border-emerald-500/20 rounded-xl p-3 min-h-0">
+                    <div className="flex items-center justify-between mb-2 pb-1.5 border-b border-emerald-500/10">
+                      <div className="flex items-center gap-1.5 text-emerald-400">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                        <span className="text-[10px] font-black tracking-wider uppercase">SURVIVING ({survivingPlayers.length})</span>
+                      </div>
+                      <span className="text-[8px] text-emerald-400/80 uppercase font-bold bg-emerald-950/40 border border-emerald-500/15 px-1.5 py-0.5 rounded">ALIVE</span>
+                    </div>
+                    
+                    <div className="flex-1 overflow-y-auto custom-scrollbar pr-0.5">
+                      <div className="grid grid-cols-2 md:grid-cols-1 xl:grid-cols-2 gap-2">
+                        <AnimatePresence mode="popLayout">
+                          {survivingPlayers.map(p => {
+                            const isWinner = winner?.id === p.id;
+                            return (
+                              <motion.div
+                                layout
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                transition={{ type: "spring", stiffness: 350, damping: 25 }}
+                                key={`survivor-${p.id}`}
+                                className={`p-2 rounded-lg border transition-all duration-300 flex flex-col justify-between gap-1 relative overflow-hidden ${
+                                  isWinner ? 'bg-gradient-to-br from-yellow-500/25 to-amber-600/15 border-yellow-400 shadow-[0_0_15px_rgba(251,191,36,0.25)] ring-1 ring-yellow-400/40' :
+                                  'bg-emerald-500/5 border-emerald-500/30'
+                                }`}
+                              >
+                                <div className="flex items-center justify-between gap-1 min-w-0">
+                                  <span className={`font-mono font-black text-[9px] px-1.5 py-0.5 rounded shrink-0 ${
+                                    isWinner ? 'bg-yellow-400 text-slate-900 shadow-sm' :
+                                    'bg-emerald-500/25 text-emerald-300'
+                                  }`}>
+                                    ID {p.id}
+                                  </span>
+                                  
+                                  <span className={`text-[8px] font-black tracking-widest uppercase px-1 py-0.5 rounded shrink-0 ${
+                                    isWinner ? 'text-yellow-400 animate-bounce' :
+                                    'text-emerald-400 bg-emerald-500/5 font-bold'
+                                  }`}>
+                                    {isWinner ? '👑 WINNER' : '● STAY'}
+                                  </span>
+                                </div>
+                                
+                                <div className="min-w-0 flex-1 py-0.5">
+                                  <p className={`text-[11px] font-bold truncate ${
+                                    isWinner ? 'text-yellow-200' : 'text-white/90'
+                                  }`}>
+                                    {p.name}
+                                  </p>
+                                </div>
+                                <div className={`h-0.5 w-full rounded-full ${
+                                  isWinner ? 'bg-gradient-to-r from-yellow-400 to-amber-500' : 'bg-emerald-500/60'
+                                }`} />
+                              </motion.div>
+                            );
+                          })}
+                        </AnimatePresence>
+                      </div>
+                    </div>
+                  </div>
 
-                          {/* Candidate info labels */}
-                          <div className="min-w-0 flex-1">
-                            <p className={`text-[11px] font-bold truncate ${
-                              isWinner ? 'text-yellow-250' :
-                              isAlive ? 'text-white' :
-                              'text-white/40 line-through font-normal'
-                            }`}>
-                              {p.name}
-                            </p>
-                          </div>
+                  {/* Eliminated players frame */}
+                  <div className="flex-1 flex flex-col bg-slate-950/30 border border-red-950/45 rounded-xl p-3 min-h-0">
+                    <div className="flex items-center justify-between mb-2 pb-1.5 border-b border-red-950/30">
+                      <div className="flex items-center gap-1.5 text-red-400">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-600" />
+                        <span className="text-[10px] font-black tracking-wider uppercase">ELIMINATED ({tiedPlayers.length - survivingPlayers.length})</span>
+                      </div>
+                      <span className="text-[8px] text-red-400/80 uppercase font-bold bg-red-950/30 border border-red-500/10 px-1.5 py-0.5 rounded">OUT</span>
+                    </div>
+                    
+                    <div className="flex-1 overflow-y-auto custom-scrollbar pr-0.5">
+                      <div className="grid grid-cols-2 md:grid-cols-1 xl:grid-cols-2 gap-2">
+                        <AnimatePresence mode="popLayout">
+                          {tiedPlayers
+                            .filter(p => !survivingPlayers.some(sp => sp.id === p.id))
+                            .map(p => (
+                              <motion.div
+                                layout
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                transition={{ type: "spring", stiffness: 350, damping: 25 }}
+                                key={`eliminated-${p.id}`}
+                                className="p-2 rounded-lg border border-red-900/10 bg-red-950/10 opacity-30 select-none flex flex-col justify-between gap-1 relative overflow-hidden"
+                              >
+                                <div className="flex items-center justify-between gap-1 min-w-0">
+                                  <span className="font-mono font-black text-[9px] px-1.5 py-0.5 rounded shrink-0 bg-slate-800 text-slate-500 line-through">
+                                    ID {p.id}
+                                  </span>
+                                  <span className="text-[8px] font-black tracking-widest uppercase px-1 py-0.5 rounded shrink-0 text-red-500/80">
+                                    ELIMINATED
+                                  </span>
+                                </div>
+                                <div className="min-w-0 flex-1 py-0.5">
+                                  <p className="text-[11px] text-white/40 line-through truncate font-normal">
+                                    {p.name}
+                                  </p>
+                                </div>
+                                <div className="h-0.5 w-full bg-red-900/10 rounded-full" />
+                              </motion.div>
+                            ))}
+                        </AnimatePresence>
+                      </div>
+                    </div>
+                  </div>
 
-                          {/* Soft colored indicator strip on bottom */}
-                          <div className={`h-0.5 w-full rounded-full ${
-                            isWinner ? 'bg-gradient-to-r from-yellow-400 to-amber-500' :
-                            isAlive ? 'bg-emerald-500' :
-                            'bg-red-900/10'
-                          }`} />
-                        </motion.div>
-                      );
-                    })}
-                  </AnimatePresence>
                 </div>
               )
             )}
