@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Trophy, ArrowRight, RotateCcw, XSquare, Ticket, Star, AlertCircle, CheckCircle } from 'lucide-react';
+import { Trophy, ArrowRight, RotateCcw, XSquare, Ticket, Star, AlertCircle, CheckCircle, Users } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { AppState, Player } from '../types';
 
@@ -13,11 +13,16 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
   const [currentPrizeIndex, setCurrentPrizeIndex] = useState(0);
   const [remainingPlayers, setRemainingPlayers] = useState<Player[]>([...state.players]);
   
-  const [phase, setPhase] = useState<'idle' | 'spinning_code' | 'tied' | 'spinning_tie' | 'revealed'>('idle');
+  const [phase, setPhase] = useState<'idle' | 'spinning_code' | 'tied' | 'eliminating' | 'revealed'>('idle');
   const [winner, setWinner] = useState<Player | null>(null);
-  const [displayText, setDisplayText] = useState<string>('???');
+  const [displayText, setDisplayText] = useState<string>('??');
   const [targetCode, setTargetCode] = useState<string>('');
   const [tiedPlayers, setTiedPlayers] = useState<Player[]>([]);
+  
+  // Elimination states
+  const [survivingPlayers, setSurvivingPlayers] = useState<Player[]>([]);
+  const [lastEliminated, setLastEliminated] = useState<Player[]>([]);
+  const [eliminationRound, setEliminationRound] = useState<number>(0);
 
   const [confirmDialog, setConfirmDialog] = useState<'reset' | 'stop' | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -56,86 +61,105 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
 
     setPhase('spinning_code');
 
-    // Generate a random 3-digit number that exists in at least one player's ID
+    // Collect all valid 2-digit substrings that exist in remaining players' IDs.
+    const allSubstrings = new Set<string>();
+    remainingPlayers.forEach(p => {
+      const pidStr = String(p.id).padStart(3, '0');
+      for (let i = 0; i < pidStr.length - 1; i++) {
+        allSubstrings.add(pidStr.slice(i, i + 2));
+      }
+    });
+
+    const substringList = Array.from(allSubstrings);
     let code = '';
     let tied: Player[] = [];
-    let attempts = 0;
-    
-    while (tied.length === 0 && attempts < 10000) {
-      code = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-      tied = remainingPlayers.filter(p => {
-        const pid = String(p.id).padStart(3, '0');
-        return pid.includes(code) || code.includes(pid);
-      });
-      attempts++;
-    }
 
-    // Fallback if no match is found
-    if (tied.length === 0) {
-      const randomWinner = remainingPlayers[Math.floor(Math.random() * remainingPlayers.length)];
-      const str = String(randomWinner.id).padStart(3, '0');
-      code = str.length >= 3 ? str.slice(-3) : str;
+    if (substringList.length > 0) {
+      // 100% Balanced choice: select one 2-digit code from the unique set so frequency of any digit (like '1') in IDs doesn't skew selection probability!
+      code = substringList[Math.floor(Math.random() * substringList.length)];
       tied = remainingPlayers.filter(p => {
-        const pid = String(p.id).padStart(3, '0');
-        return pid.includes(code) || code.includes(pid);
+        const pidStr = String(p.id).padStart(3, '0');
+        return pidStr.includes(code);
+      });
+    } else {
+      // Fallback
+      const randomWinner = remainingPlayers[Math.floor(Math.random() * remainingPlayers.length)];
+      code = String(randomWinner.id).padStart(3, '0').slice(-2);
+      tied = remainingPlayers.filter(p => {
+        const pidStr = String(p.id).padStart(3, '0');
+        return pidStr.includes(code);
       });
     }
     
     setTargetCode(code);
     setTiedPlayers(tied);
+    setSurvivingPlayers(tied);
+    setLastEliminated([]);
+    setEliminationRound(0);
 
-    // Spin effect: rapidly cycle 3 random digits
+    // Spin effect: rapidly cycle 2 random digits
     let ticks = 0;
     const maxTicks = 50; // 2.5 seconds at 50ms per tick
     
     const interval = setInterval(() => {
       ticks++;
       const chars = '0123456789';
-      const randomCode = Array(3).fill(0).map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
+      const randomCode = Array(2).fill(0).map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
       setDisplayText(randomCode);
 
       if (ticks >= maxTicks) {
         clearInterval(interval);
         setDisplayText(code);
-        setPhase('tied'); // Move to tied phase to build suspense
+        
+        if (tied.length === 1) {
+          setWinner(tied[0]);
+          setPhase('revealed');
+          triggerConfetti();
+        } else {
+          setPhase('tied'); // Move to tied phase to begin elimination
+        }
       }
     }, 50);
   };
 
-  const handleSpinTie = () => {
+  const handleEliminateHalf = () => {
     if (phase !== 'tied') return;
+    if (survivingPlayers.length <= 1) return;
 
-    const finalWinner = tiedPlayers.length === 1 
-      ? tiedPlayers[0] 
-      : tiedPlayers[Math.floor(Math.random() * tiedPlayers.length)];
-    
-    setWinner(finalWinner);
-
-    if (tiedPlayers.length === 1) {
-      // Skip spinning if there's only 1 matching ID
-      setDisplayText(finalWinner.id);
-      setPhase('revealed');
-      triggerConfetti();
-      return;
-    }
-
-    // Reveal the winner (picked from many)
-    setPhase('spinning_tie');
+    setPhase('eliminating');
 
     let ticks = 0;
-    const maxTicks = 50;
-    
+    const maxTicks = 30; // 1.5 seconds
+
     const interval = setInterval(() => {
       ticks++;
-      const randomPlayer = tiedPlayers[Math.floor(Math.random() * tiedPlayers.length)];
-      
-      setDisplayText(randomPlayer.id);
+      // Shuffle randomly to simulate cycling look/shake in the UI
+      const chars = '0123456789';
+      setDisplayText(Array(2).fill(0).map(() => chars[Math.floor(Math.random() * chars.length)]).join(''));
 
       if (ticks >= maxTicks) {
         clearInterval(interval);
-        setDisplayText(finalWinner.id);
-        setPhase('revealed');
-        triggerConfetti();
+
+        const total = survivingPlayers.length;
+        const keepCount = Math.ceil(total / 2);
+
+        // Shuffle and choose survivors
+        const shuffled = [...survivingPlayers].sort(() => Math.random() - 0.5);
+        const nextSurvivors = shuffled.slice(0, keepCount);
+        const eliminated = shuffled.slice(keepCount);
+
+        setSurvivingPlayers(nextSurvivors);
+        setLastEliminated(eliminated);
+        setEliminationRound(prev => prev + 1);
+        setDisplayText(targetCode);
+
+        if (nextSurvivors.length === 1) {
+          setWinner(nextSurvivors[0]);
+          setPhase('revealed');
+          triggerConfetti();
+        } else {
+          setPhase('tied');
+        }
       }
     }, 50);
   };
@@ -151,28 +175,22 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
   };
 
   const rejectWinner = () => {
-    if (!winner || !currentPrize) return;
-    
-    setState(s => ({
-      ...s,
-      rejected: [...s.rejected, { prize: currentPrize, player: winner }]
-    }));
-    
-    setRemainingPlayers(prev => prev.filter(p => p.id !== winner.id));
-    
-    const newTiedPlayers = tiedPlayers.filter(p => p.id !== winner.id);
-    if (newTiedPlayers.length > 0) {
-      setTiedPlayers(newTiedPlayers);
-      setPhase('tied');
-      setWinner(null);
-      setDisplayText(targetCode);
-    } else {
-      setPhase('idle');
-      setWinner(null);
-      setDisplayText('????');
-      setTargetCode('');
-      setTiedPlayers([]);
+    if (winner && currentPrize) {
+      setState(s => ({
+        ...s,
+        rejected: [...s.rejected, { prize: currentPrize, player: winner }]
+      }));
+      setRemainingPlayers(prev => prev.filter(p => p.id !== winner.id));
     }
+
+    setPhase('idle');
+    setWinner(null);
+    setDisplayText('??');
+    setTargetCode('');
+    setTiedPlayers([]);
+    setSurvivingPlayers([]);
+    setLastEliminated([]);
+    setEliminationRound(0);
   };
 
   const triggerConfetti = () => {
@@ -206,9 +224,12 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
     setCurrentPrizeIndex(prev => prev + 1);
     setPhase('idle');
     setWinner(null);
-    setDisplayText('????');
+    setDisplayText('??');
     setTargetCode('');
     setTiedPlayers([]);
+    setSurvivingPlayers([]);
+    setLastEliminated([]);
+    setEliminationRound(0);
   };
 
   if (isFinished || !currentPrize) {
@@ -310,191 +331,324 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <div className="flex-1 w-full flex flex-col md:flex-row gap-6 pt-20 md:pt-24 pb-8 relative z-10 min-h-0 max-w-7xl mx-auto">
+      <div className="flex-1 w-full flex flex-col lg:flex-row gap-6 pt-20 md:pt-24 pb-4 relative z-10 min-h-0 max-w-7xl mx-auto overflow-hidden">
         
-        {/* Left/Center: Lottery Machine & Titles */}
-        <div className="flex-1 flex flex-col items-center justify-center gap-2 min-w-0 md:pl-8 lg:pl-16 mb-8 mt-12 md:mt-16 w-full">
+        {/* Left Column: Lottery Machine, Title, Prize & Controller Card */}
+        <div className="w-full lg:w-[48%] flex flex-col items-center justify-between gap-4 min-h-0 shrink-0">
           
-          {/* Event Name */}
-          <div className="flex flex-col items-center mb-4 md:mb-8 w-full px-2 md:px-4 mt-2">
+          {/* Event and Prize Header */}
+          <div className="w-full text-center space-y-3">
             <h1 
-              className="text-4xl md:text-5xl lg:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 via-yellow-400 to-yellow-600 uppercase tracking-widest drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] leading-tight md:leading-tight max-w-full text-center"
+              className="text-3xl md:text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 via-yellow-400 to-yellow-600 uppercase tracking-widest drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] leading-tight max-w-full"
               style={{ textWrap: 'balance' }}
             >
               {state.eventName}
             </h1>
-            <div className="mt-6 bg-slate-900/80 backdrop-blur-md px-6 py-2 rounded-full border border-white/10 shadow-[0_0_20px_rgba(0,0,0,0.5)]">
-              <p className="text-sm md:text-base text-blue-200 font-bold tracking-wider uppercase">
-                Remaining Players: <span className="text-white text-lg">{remainingPlayers.length}</span>
+            
+            <motion.div 
+              initial={{ y: -10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              className="bg-slate-900/70 backdrop-blur-md rounded-2xl border border-white/10 p-4 shadow-xl text-center space-y-1 w-full max-w-xl mx-auto"
+            >
+              <div className="inline-flex items-center gap-2 bg-blue-900/40 text-blue-300 px-3.5 py-1 rounded-full text-xs font-bold tracking-widest uppercase border border-blue-500/20">
+                ⭐ GIẢI ĐANG QUAY: GIẢI {currentPrizeIndex + 1} / {state.prizes.length}
+              </div>
+              <h2 className="text-2xl md:text-3xl font-black text-white uppercase tracking-wide truncate">
+                {currentPrize.name}
+              </h2>
+              <p className="text-sm md:text-base font-medium text-blue-300 line-clamp-2">
+                {currentPrize.content}
               </p>
-            </div>
+            </motion.div>
           </div>
 
-          {/* Prize Info Header */}
-        <motion.div 
-          initial={{ y: -30, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className="text-center space-y-2"
-        >
-          <div className="inline-flex items-center gap-2 bg-blue-900/50 text-blue-200 px-4 py-1 rounded-full mb-2 border border-blue-500/30">
-            <span className="font-bold tracking-widest uppercase text-xs">
-              ROUND {currentPrizeIndex + 1} / {state.prizes.length}
-            </span>
-          </div>
-          <h1 className="text-4xl md:text-5xl font-black text-white uppercase tracking-wider drop-shadow-md">
-            {currentPrize.name}
-          </h1>
-          <p className="text-xl md:text-2xl font-bold text-blue-300 drop-shadow-md">
-            {currentPrize.content}
-          </p>
-        </motion.div>
+          {/* Lottery Draw Visualization Board */}
+          <div className="relative w-full max-w-xl mx-auto flex-1 flex flex-col justify-center min-h-[220px]">
+            <motion.div
+              animate={phase === 'spinning_code' || phase === 'eliminating' ? { y: [-2, 2, -2] } : {}}
+              transition={{ repeat: Infinity, duration: 0.1 }}
+              className={`
+                relative overflow-hidden rounded-2xl border-2 flex flex-col items-center justify-center min-h-[200px] w-full p-6 shadow-2xl backdrop-blur-sm transition-colors duration-300
+                ${phase === 'idle' ? 'bg-slate-900/80 border-white/10' : ''}
+                ${phase === 'spinning_code' || phase === 'eliminating' ? 'bg-blue-900/80 border-blue-400 shadow-[0_0_30px_rgba(59,130,246,0.3)]' : ''}
+                ${phase === 'tied' || phase === 'revealed' ? 'bg-emerald-950/80 border-emerald-400 shadow-[0_0_30px_rgba(52,211,153,0.3)]' : ''}
+              `}
+            >
+              <div className="relative z-10 text-center w-full">
+                {phase === 'idle' && (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex flex-col items-center gap-3 text-white/40"
+                  >
+                    <Ticket className="w-12 h-12 text-blue-400 animate-pulse" />
+                    <p className="text-sm font-bold tracking-widest uppercase text-blue-300/60">READY TO DRAW</p>
+                    <div className="text-7xl font-black font-mono tracking-widest text-white/15 select-none">
+                      ??
+                    </div>
+                  </motion.div>
+                )}
 
-        {/* Lottery Result Board */}
-        <div className="relative w-full max-w-2xl mt-4">
-          <motion.div
-            animate={phase === 'spinning_code' || phase === 'spinning_tie' ? { y: [-2, 2, -2] } : {}}
-            transition={{ repeat: Infinity, duration: 0.1 }}
-            className={`
-              relative overflow-hidden rounded-2xl border-2 flex flex-col items-center justify-center min-h-[180px] p-6 shadow-2xl backdrop-blur-sm transition-colors duration-300
-              ${phase === 'idle' ? 'bg-slate-900/80 border-white/10' : ''}
-              ${phase === 'spinning_code' || phase === 'spinning_tie' ? 'bg-blue-900/80 border-blue-400 shadow-[0_0_30px_rgba(59,130,246,0.3)]' : ''}
-              ${phase === 'tied' || phase === 'revealed' ? 'bg-emerald-900/80 border-emerald-400 shadow-[0_0_30px_rgba(52,211,153,0.3)]' : ''}
-            `}
-          >
-            <div className="relative z-10 text-center w-full">
-              {phase === 'idle' && (
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="flex flex-col items-center gap-3 text-white/40"
-                >
-                  <Ticket className="w-12 h-12 opacity-50" />
-                  <p className="text-lg font-bold tracking-widest uppercase">READY TO DRAW</p>
-                </motion.div>
-              )}
-
-              {phase === 'spinning_code' && (
-                <div className="space-y-2">
-                  <p className="font-bold text-sm tracking-widest uppercase text-blue-300 animate-pulse">
-                    DRAWING NUMBER...
-                  </p>
-                  <div className="text-6xl md:text-7xl font-black tracking-widest text-white font-mono drop-shadow-lg">
-                    {displayText}
+                {phase === 'spinning_code' && (
+                  <div className="space-y-2">
+                    <p className="font-bold text-sm tracking-widest uppercase text-blue-300 animate-pulse">
+                      ĐANG QUAY 2 CHỮ SỐ MAY MẮN...
+                    </p>
+                    <div className="text-7xl md:text-8xl font-black tracking-widest text-yellow-400 font-mono drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]">
+                      {displayText}
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {phase === 'eliminating' && (
+                  <div className="space-y-3">
+                    <p className="font-bold text-xs tracking-widest uppercase text-red-300 animate-pulse">
+                      ĐANG THANH LỌC 1/2 SỐ ỨNG VIÊN...
+                    </p>
+                    <div className="text-6xl md:text-7xl font-black tracking-widest text-red-500 font-mono drop-shadow-[0_0_15px_rgba(239,68,68,0.5)]">
+                      {displayText}
+                    </div>
+                    <div className="text-xs font-semibold text-white/50 bg-red-950/40 py-1 px-3 rounded-full inline-block border border-red-500/20">
+                      Vòng Thanh Lọc Thải Trừ Thứ {eliminationRound + 1}
+                    </div>
+                  </div>
+                )}
+
+                {phase === 'tied' && (
+                  <div className="space-y-3 w-full">
+                    <span className="text-xs font-bold tracking-widest uppercase text-yellow-400 bg-yellow-400/10 px-3.5 py-1 rounded-full border border-yellow-500/20">
+                      CON SỐ MAY MẮN: {targetCode}
+                    </span>
+                    <h3 className="text-2xl font-black text-white uppercase tracking-wider">
+                      VÒNG LOẠI {eliminationRound > 0 ? `THÀNH VIÊN TIER ${eliminationRound}` : 'BAN ĐẦU'}
+                    </h3>
+                    <p className="text-sm font-semibold tracking-wide text-emerald-400">
+                      Còn giữ lại {survivingPlayers.length} trong tổng {tiedPlayers.length} ứng viên có mã ID chứa "{targetCode}"
+                    </p>
+                  </div>
+                )}
+
+                {phase === 'revealed' && winner && (
+                  <div className="space-y-3 animate-fade-in">
+                    <p className="font-bold text-xs tracking-widest uppercase text-yellow-400 bg-yellow-400/10 px-3 py-1 rounded-full border border-yellow-500/20 inline-block animate-bounce">
+                      👑 CHỦ NHÂN ĐOẠT GIẢI DUY NHẤT 👑
+                    </p>
+                    <div className="text-6xl font-black tracking-wider text-white drop-shadow-xl font-mono">
+                      {winner.id}
+                    </div>
+                    <div className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 drop-shadow-md truncate px-4">
+                      {winner.name}
+                    </div>
+                    <div className="mt-2 text-white/40 text-xs font-medium max-w-sm mx-auto">
+                      Đăng quang vinh quang sau {eliminationRound} vòng thanh lọc căng thẳng của mã {targetCode}!
+                    </div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Action Button Controls */}
+          <div className="h-16 w-full flex items-center justify-center shrink-0">
+            <AnimatePresence mode="wait">
+              {phase === 'idle' && (
+                <motion.button
+                  key="spin-btn"
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleSpinCode}
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-505 text-white font-extrabold text-lg py-4 px-10 rounded-2xl shadow-[0_4px_20px_rgba(59,130,246,0.3)] flex items-center gap-3 tracking-widest uppercase transition-all"
+                >
+                  QUAY SỐ MAY MẮN
+                </motion.button>
               )}
 
               {phase === 'tied' && (
-                <div className="space-y-2">
-                  <p className="font-bold text-sm tracking-widest uppercase text-emerald-300">
-                    {tiedPlayers.length > 1 
-                      ? `FOUND ${tiedPlayers.length} MATCHES!` 
-                      : 'FOUND 1 MATCH!'}
-                  </p>
-                  <div className="text-6xl md:text-7xl font-black tracking-widest text-white drop-shadow-lg font-mono">
-                    {targetCode}
-                  </div>
-                  {tiedPlayers.length > 0 && (
-                    <div className="mt-4 flex flex-wrap justify-center gap-2 w-full max-w-xl mx-auto p-2 max-h-[150px] overflow-y-auto custom-scrollbar relative z-30">
-                      {tiedPlayers.map(p => (
-                        <span key={p.id} className="bg-slate-800/90 border border-emerald-500/50 px-3 py-2 rounded-lg text-emerald-300 font-mono font-bold text-sm shadow-lg">
-                          {p.id} - {p.name}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <motion.button
+                  key="tie-btn"
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleEliminateHalf}
+                  className="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-extrabold text-base py-3.5 px-8 rounded-2xl shadow-[0_4px_20px_rgba(239,68,68,0.3)] flex items-center gap-2.5 tracking-wider uppercase transition-all"
+                >
+                  {survivingPlayers.length > 2 
+                    ? `TIẾN HÀNH THẢI TRỪ 1/2 (${survivingPlayers.length} người)` 
+                    : 'QUAY CHUNG KẾT (1 VỌI 1)'}
+                </motion.button>
               )}
 
-              {phase === 'spinning_tie' && (
-                <div className="space-y-2">
-                  <p className="font-bold text-sm tracking-widest uppercase text-blue-300 animate-pulse">
-                    SELECTING WINNER...
-                  </p>
-                  <div className="text-4xl md:text-5xl font-black tracking-wider text-white truncate px-4 font-mono drop-shadow-lg">
-                    {displayText}
-                  </div>
+              {phase === 'revealed' && (
+                <div className="flex gap-4 w-full max-w-md">
+                  <motion.button
+                    key="accept-btn"
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={acceptWinner}
+                    className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-base py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-lg uppercase tracking-wider"
+                  >
+                    <CheckCircle className="w-5 h-5" /> CHẤP NHẬN
+                  </motion.button>
+                  <motion.button
+                    key="reject-btn"
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={rejectWinner}
+                    className="flex-1 bg-slate-800 hover:bg-slate-700 text-white/90 font-bold text-base py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-md uppercase tracking-wider border border-white/10"
+                  >
+                    <XSquare className="w-5 h-5" /> HỦY KẾT QUẢ
+                  </motion.button>
                 </div>
               )}
+            </AnimatePresence>
+          </div>
+        </div>
 
-              {phase === 'revealed' && winner && (
-                <div className="space-y-2">
-                  <p className="font-bold text-sm tracking-widest uppercase text-emerald-300">
-                    WINNER
-                  </p>
-                  <div className="text-4xl md:text-5xl font-black tracking-wider text-white drop-shadow-lg truncate px-4 font-mono">
-                    {winner.id}
-                  </div>
-                  <div className="text-2xl md:text-3xl font-bold text-yellow-400 drop-shadow-md truncate px-4">
-                    {winner.name}
-                  </div>
-                </div>
+        {/* Right Column: Dynamic Player Arena Panel */}
+        <div className="flex-1 w-full bg-slate-950/60 backdrop-blur-md rounded-3xl border border-white/15 p-4 md:p-6 flex flex-col min-h-0 overflow-hidden shadow-2xl">
+          
+          {/* Header & Status Metrics for Right Panel */}
+          <div className="flex items-center justify-between gap-4 pb-4 border-b border-white/10 mb-4 shrink-0">
+            <div className="flex items-center gap-2.5">
+              <span className="p-2 bg-blue-500/10 rounded-xl text-blue-400 border border-blue-500/20">
+                <Users className="w-5 h-5" />
+              </span>
+              <div>
+                <h3 className="text-lg font-black text-white tracking-wide uppercase">
+                  {phase === 'idle' || phase === 'spinning_code' 
+                    ? 'DANH SÁCH THAM GIA VÒNG QUAY' 
+                    : 'KHÁN ĐÀI ĐẤU TRƯỜNG CHUNG KẾT'}
+                </h3>
+                <p className="text-xs text-white/50 tracking-wider">
+                  {phase === 'idle' || phase === 'spinning_code'
+                    ? `Tất cả nguồn người chơi hợp lệ còn lại trong hệ thống`
+                    : `Đấu trường thanh lọc từ con số may mắn "${targetCode}"`}
+                </p>
+              </div>
+            </div>
+            
+            {/* Realtime stats badge */}
+            <div className="bg-slate-900/90 border border-white/10 px-3 py-1.5 rounded-xl flex items-center gap-3 font-mono text-xs">
+              {phase === 'idle' || phase === 'spinning_code' ? (
+                <>
+                  <span className="text-white/65">TỔNG SỐ:</span>
+                  <span className="text-blue-400 font-bold text-sm">{remainingPlayers.length}</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-emerald-400 font-bold py-0.5 px-1 bg-emerald-500/10 rounded">BÁM TRỤ: {survivingPlayers.length}</span>
+                  <span className="text-white/30">|</span>
+                  <span className="text-red-400 font-bold py-0.5 px-1 bg-red-500/10 rounded">SÀNG LỌC: {tiedPlayers.length - survivingPlayers.length}</span>
+                </>
               )}
             </div>
-          </motion.div>
-        </div>
+          </div>
 
-        {/* Action Button */}
-        <div className="h-16 mt-2 flex items-center justify-center">
-          <AnimatePresence mode="wait">
-            {phase === 'idle' && (
-              <motion.button
-                key="spin-btn"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleSpinCode}
-                className="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xl py-4 px-12 rounded-xl shadow-lg flex items-center gap-3 tracking-widest uppercase transition-all"
-              >
-                START DRAW
-              </motion.button>
-            )}
+          {/* Grid View of Players */}
+          <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-1">
+            {phase === 'idle' || phase === 'spinning_code' ? (
+              /* DENSE CHIP VIEW for ALL ACTIVE PLAYERS */
+              remainingPlayers.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center p-8 text-white/30 text-center gap-2">
+                  <Users className="w-12 h-12 stroke-[1.5]" />
+                  <p className="italic">Không còn người chơi nào khả dụng để quay thưởng.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-3 gap-2 p-1">
+                  {remainingPlayers.map(p => (
+                    <div 
+                      key={p.id} 
+                      className="bg-slate-900/40 border border-white/5 p-2 rounded-xl flex items-center gap-2 hover:border-white/15 transition-all w-full min-w-0"
+                    >
+                      <div className="w-7 h-7 bg-blue-500/10 rounded-lg flex items-center justify-center font-mono font-bold text-xs text-blue-300 shrink-0 border border-blue-500/10">
+                        {p.id}
+                      </div>
+                      <p className="text-xs font-semibold text-white/80 truncate flex-1 min-w-0">{p.name}</p>
+                    </div>
+                  ))}
+                </div>
+              )
+            ) : (
+              /* DUAL-STATE ACTIVE/ELIMINATED VISUAL CONTAINER */
+              tiedPlayers.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center p-8 text-white/30 text-center gap-2">
+                  <Ticket className="w-12 h-12 stroke-[1.5]" />
+                  <p className="italic">Không tìm thấy mã khớp. Hãy nhấn hủy hoặc quay lại.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-3 gap-3 p-1">
+                  <AnimatePresence>
+                    {tiedPlayers.map(p => {
+                      const isWinner = winner?.id === p.id;
+                      const isAlive = survivingPlayers.some(s => s.id === p.id);
+                      
+                      return (
+                        <motion.div
+                          layout
+                          initial={{ opacity: 0, scale: 0.92 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.92 }}
+                          transition={{ type: "spring", stiffness: 350, damping: 25 }}
+                          key={`contestant-${p.id}`}
+                          className={`p-3 md:p-3.5 rounded-2xl border transition-all duration-300 flex flex-col justify-between gap-2.5 relative overflow-hidden ${
+                            isWinner ? 'bg-gradient-to-br from-yellow-500/25 to-amber-600/15 border-yellow-400 shadow-[0_0_20px_rgba(251,191,36,0.3)] ring-2 ring-yellow-400/40' :
+                            isAlive ? 'bg-emerald-500/10 border-emerald-500/45 shadow-[0_4px_12px_rgba(16,185,129,0.1)]' :
+                            'bg-red-950/15 border-red-900/10 opacity-30 select-none'
+                          }`}
+                        >
+                          {/* Top Tag Bar */}
+                          <div className="flex items-center justify-between gap-1.5 min-w-0">
+                            <span className={`font-mono font-black text-xs px-2 py-0.5 rounded-lg shrink-0 ${
+                              isWinner ? 'bg-yellow-400 text-slate-900 shadow-md' :
+                              isAlive ? 'bg-emerald-500/20 text-emerald-300' :
+                              'bg-slate-800/50 text-slate-500 line-through'
+                            }`}>
+                              ID {p.id}
+                            </span>
+                            
+                            <span className={`text-[9px] font-black tracking-widest uppercase px-1.5 py-0.5 rounded shrink-0 ${
+                              isWinner ? 'text-yellow-400 animate-bounce' :
+                              isAlive ? 'text-emerald-400 animate-pulse bg-emerald-500/5' :
+                              'text-red-500/60 bg-red-500/5'
+                            }`}>
+                              {isWinner ? '👑 THẮNG CỰC' : isAlive ? '● DỰ PHẦN' : 'LOẠI'}
+                            </span>
+                          </div>
 
-            {phase === 'tied' && (
-              <motion.button
-                key="tie-btn"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleSpinTie}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xl py-4 px-12 rounded-xl shadow-lg flex items-center gap-3 tracking-widest uppercase transition-all"
-              >
-                {tiedPlayers.length > 1 ? 'FINAL DRAW' : 'CLAIM PRIZE'}
-              </motion.button>
-            )}
+                          {/* Candidate info labels */}
+                          <div className="min-w-0 flex-1">
+                            <p className={`text-xs md:text-sm font-extrabold truncate ${
+                              isWinner ? 'text-yellow-200' :
+                              isAlive ? 'text-white' :
+                              'text-white/40 line-through font-normal'
+                            }`}>
+                              {p.name}
+                            </p>
+                          </div>
 
-            {phase === 'revealed' && (
-              <div className="flex gap-4">
-                <motion.button
-                  key="accept-btn"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={acceptWinner}
-                  className="bg-green-600 hover:bg-green-500 text-white font-bold text-xl py-4 px-8 rounded-xl flex items-center gap-3 transition-all shadow-lg uppercase tracking-wider"
-                >
-                  <CheckCircle className="w-6 h-6" /> CHẤP NHẬN
-                </motion.button>
-                <motion.button
-                  key="reject-btn"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={rejectWinner}
-                  className="bg-red-600 hover:bg-red-500 text-white font-bold text-xl py-4 px-8 rounded-xl flex items-center gap-3 transition-all shadow-lg uppercase tracking-wider"
-                >
-                  <XSquare className="w-6 h-6" /> HỦY KẾT QUẢ
-                </motion.button>
-              </div>
+                          {/* Soft colored indicator strip on bottom */}
+                          <div className={`h-1 w-full rounded-full ${
+                            isWinner ? 'bg-gradient-to-r from-yellow-400 to-amber-500' :
+                            isAlive ? 'bg-emerald-500' :
+                            'bg-red-900/10'
+                          }`} />
+                        </motion.div>
+                      );
+                    })}
+                  </AnimatePresence>
+                </div>
+              )
             )}
-          </AnimatePresence>
-        </div>
+          </div>
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Trophy, RefreshCcw, Download, Star, AlertTriangle, Users } from 'lucide-react';
+import { Trophy, RefreshCcw, Download, Star, AlertTriangle, Users, CheckCircle } from 'lucide-react';
 import { AppState } from '../types';
 
 interface ResultScreenProps {

@@ -67,9 +67,14 @@ export default function ConfigScreen({ state, setState }: ConfigScreenProps) {
       })
       .filter(player => {
         // Filter out header rows
-        const idLower = player.id.toLowerCase();
-        const nameLower = player.name.toLowerCase();
-        return !headerKeywords.some(keyword => idLower.includes(keyword) || nameLower.includes(keyword));
+        const idLower = player.id.toLowerCase().trim();
+        const nameLower = player.name.toLowerCase().trim();
+        return !headerKeywords.some(keyword => {
+          if (keyword.length <= 4) {
+            return idLower === keyword || nameLower === keyword;
+          }
+          return idLower.includes(keyword) || nameLower.includes(keyword);
+        });
       });
   };
 
