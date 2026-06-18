@@ -55,7 +55,7 @@ const StickFigure = ({ color = "currentColor", size = 40, opacity = 1, isDead = 
     idClasses += "-top-4 text-[8px] text-stone-400/80 bg-transparent";
   } else {
     idClasses += "border shadow-lg ";
-    if (largeId) idClasses += "-top-[85px] text-[15px] px-4 py-2.5 rounded-xl ";
+    if (largeId) idClasses += "-top-[95px] text-[15px] px-4 py-2.5 rounded-xl ";
     else idClasses += "-top-11 text-[11px] px-2.5 py-1.5 rounded-lg ";
     
     if (isWinner) idClasses += "bg-yellow-400 text-slate-950 border-yellow-500 shadow-[0_0_20px_rgba(250,204,21,0.7)]";
@@ -592,7 +592,7 @@ export default function Game9Screen({ state, setState }: Game9ScreenProps) {
                         zIndex: i 
                       }}
                     >
-                      <StickFigure color="#52525b" size={35} id={p.id} name={p.name} isScrambling={true} />
+                      <StickFigure color="#52525b" size={55} id={p.id} name={p.name} isScrambling={true} />
                     </div>
                   ))}
                 </div>
@@ -696,7 +696,7 @@ export default function Game9Screen({ state, setState }: Game9ScreenProps) {
             </div>
 
             {/* The Lineup and Scope Container */}
-            <div className="relative w-full max-w-4xl h-[200px] mt-12 mx-auto">
+            <div className="relative w-full max-w-6xl h-[330px] mt-16 mx-auto">
               {/* Sniper Scope */}
               {phase === 'firing' && (
                 <motion.div 
@@ -739,7 +739,7 @@ export default function Game9Screen({ state, setState }: Game9ScreenProps) {
                   >
                     <StickFigure 
                       color={p.isAlive ? "#e4e4e7" : "#450a0a"} 
-                      size={120} 
+                      size={200} 
                       isDead={!p.isAlive} 
                       id={p.id}
                       name={p.name}

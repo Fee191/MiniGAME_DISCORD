@@ -331,10 +331,10 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <div className="flex-1 w-full flex flex-col lg:flex-row gap-4 pt-16 md:pt-18 pb-2 relative z-10 min-h-0 max-w-7xl mx-auto overflow-hidden">
+      <div className="flex-1 w-full flex flex-col lg:flex-row gap-6 pt-16 md:pt-18 pb-2 relative z-10 min-h-0 max-w-none px-4 md:px-8 mx-auto overflow-hidden">
         
         {/* Left Column: Lottery Machine, Title, Prize & Controller Card */}
-        <div className="w-full lg:w-[48%] flex flex-col items-center justify-between gap-3 min-h-0 shrink-0">
+        <div className="w-full lg:w-[42%] flex flex-col items-center justify-between gap-4 min-h-0 shrink-0">
           
           {/* Event and Prize Header */}
           <div className="w-full text-center space-y-1">
@@ -363,12 +363,12 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
           </div>
 
           {/* Lottery Draw Visualization Board */}
-          <div className="relative w-full max-w-xl mx-auto flex-1 flex flex-col justify-center min-h-[160px]">
+          <div className="relative w-full max-w-2xl mx-auto flex-1 flex flex-col justify-center min-h-[220px]">
             <motion.div
               animate={phase === 'spinning_code' || phase === 'eliminating' ? { y: [-2, 2, -2] } : {}}
               transition={{ repeat: Infinity, duration: 0.1 }}
               className={`
-                relative overflow-hidden rounded-2xl border flex flex-col items-center justify-center min-h-[150px] w-full p-4 shadow-xl backdrop-blur-sm transition-colors duration-300
+                relative overflow-hidden rounded-2xl border flex flex-col items-center justify-center min-h-[200px] w-full p-6 shadow-xl backdrop-blur-sm transition-colors duration-300
                 ${phase === 'idle' ? 'bg-slate-900/80 border-white/10' : ''}
                 ${phase === 'spinning_code' || phase === 'eliminating' ? 'bg-blue-900/80 border-blue-400 shadow-[0_0_20px_rgba(59,130,246,0.3)]' : ''}
                 ${phase === 'tied' || phase === 'revealed' ? 'bg-emerald-950/80 border-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.3)]' : ''}
@@ -564,13 +564,13 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
                 </div>
               ) : (
                 <div className="flex-1 overflow-y-auto custom-scrollbar pr-1">
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-3 gap-2.5 p-1">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3.5 p-1.5">
                     {remainingPlayers.map(p => (
                       <div 
                         key={p.id} 
-                        className="bg-slate-900/40 border border-white/10 p-3 rounded-xl flex flex-col justify-center items-center hover:border-white/20 transition-all w-full min-w-0 shadow-sm"
+                        className="bg-slate-900/40 border border-white/10 p-4 rounded-xl flex flex-col justify-center items-center hover:border-white/20 transition-all w-full min-w-0 shadow-sm"
                       >
-                        <p className="text-xs md:text-sm font-bold text-white/90 truncate w-full text-center">{p.name}</p>
+                        <p className="text-sm md:text-base font-bold text-white/90 truncate w-full text-center">{p.name}</p>
                         <span className="font-mono font-black text-xs md:text-sm text-blue-300 mt-1">ID {p.id}</span>
                       </div>
                     ))}
@@ -598,7 +598,7 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
                   </div>
                   
                   <div className="flex-1 overflow-y-auto custom-scrollbar pr-0.5">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 xl:grid-cols-3 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3">
                       <AnimatePresence>
                         {tiedPlayers.map(p => {
                           const isWinner = winner?.id === p.id;
@@ -647,7 +647,7 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
                     </div>
                     
                     <div className="flex-1 overflow-y-auto custom-scrollbar pr-0.5">
-                      <div className="grid grid-cols-2 md:grid-cols-1 xl:grid-cols-2 gap-2">
+                      <div className="grid grid-cols-2 md:grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-3">
                         <AnimatePresence mode="popLayout">
                           {survivingPlayers.map(p => {
                             const isWinner = winner?.id === p.id;
@@ -708,7 +708,7 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
                     </div>
                     
                     <div className="flex-1 overflow-y-auto custom-scrollbar pr-0.5">
-                      <div className="grid grid-cols-2 md:grid-cols-1 xl:grid-cols-2 gap-2">
+                      <div className="grid grid-cols-2 md:grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-3">
                         <AnimatePresence mode="popLayout">
                           {tiedPlayers
                             .filter(p => !survivingPlayers.some(sp => sp.id === p.id))
