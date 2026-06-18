@@ -415,15 +415,15 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
                 )}
 
                 {phase === 'tied' && (
-                  <div className="space-y-2 w-full">
-                    <span className="text-[10px] font-bold tracking-widest uppercase text-yellow-400 bg-yellow-400/10 px-3 py-0.5 rounded-full border border-yellow-500/20">
-                      LUCKY DIGITS: {targetCode}
-                    </span>
-                    <h3 className="text-xl font-black text-white uppercase tracking-wider leading-none mt-1">
-                      ROUND {eliminationRound > 0 ? `STAGE ${eliminationRound}` : 'INITIAL ELIMINATION'}
-                    </h3>
-                    <p className="text-xs font-semibold tracking-wide text-emerald-400">
-                      Surviving {survivingPlayers.length} out of {tiedPlayers.length} matches containing "{targetCode}"
+                  <div className="space-y-4 w-full py-2">
+                    <p className="font-extrabold text-sm tracking-widest uppercase text-emerald-400">
+                      🍀 LUCKY DIGITS 🍀
+                    </p>
+                    <div className="text-7xl md:text-8xl font-black tracking-[0.2em] pl-[0.2em] text-yellow-400 font-mono drop-shadow-[0_0_25px_rgba(250,204,21,0.8)] animate-pulse leading-none my-1">
+                      {targetCode}
+                    </div>
+                    <p className="text-sm md:text-base font-bold tracking-wide text-white/90">
+                      Surviving <span className="text-emerald-400 font-black text-lg">{survivingPlayers.length}</span> out of <span className="text-blue-400 font-black text-lg">{tiedPlayers.length}</span> matches
                     </p>
                   </div>
                 )}
@@ -609,22 +609,14 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
                               animate={{ opacity: 1, scale: 1 }}
                               exit={{ opacity: 0, scale: 0.95 }}
                               key={`initial-match-${p.id}`}
-                              className="p-3.5 rounded-xl border border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/15 transition-colors flex flex-col justify-between gap-2.5 relative overflow-hidden shadow-sm"
+                              className="p-3 rounded-xl border border-blue-500/20 bg-slate-900/50 hover:bg-slate-900/80 transition-all flex flex-col gap-1.5 justify-center relative overflow-hidden shadow-sm text-center"
                             >
-                              <div className="min-w-0 flex-1">
-                                <p className="text-xs md:text-sm font-extrabold text-blue-100 truncate">
-                                  {p.name}
-                                </p>
-                              </div>
-                              <div className="flex items-center justify-between gap-2 min-w-0">
-                                <span className="font-mono font-black text-xs md:text-sm px-2.5 py-1 rounded shrink-0 bg-blue-500/20 text-white border border-blue-400/20">
-                                  ID {p.id}
-                                </span>
-                                <span className="text-[10px] font-black tracking-widest uppercase text-blue-300 animate-pulse bg-blue-500/25 px-2 py-1 rounded border border-blue-400/10">
-                                  IN GAME
-                                </span>
-                              </div>
-                              <div className="h-0.5 w-[50%] rounded-full bg-blue-400" />
+                              <p className="text-sm md:text-base font-black text-blue-100 truncate">
+                                {p.name}
+                              </p>
+                              <p className="font-mono font-bold text-xs md:text-sm text-blue-300/90">
+                                ID {p.id}
+                              </p>
                             </motion.div>
                           );
                         })}
@@ -659,36 +651,21 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
                                 exit={{ opacity: 0, scale: 0.95 }}
                                 transition={{ type: "spring", stiffness: 350, damping: 25 }}
                                 key={`survivor-${p.id}`}
-                                className={`p-3.5 rounded-xl border transition-all duration-300 flex flex-col justify-between gap-2.5 relative overflow-hidden ${
-                                  isWinner ? 'bg-gradient-to-br from-yellow-500/25 to-amber-600/15 border-yellow-400 shadow-[0_0_15px_rgba(251,191,36,0.25)] ring-1 ring-yellow-400/40' :
-                                  'bg-emerald-500/10 border-emerald-500/40'
+                                className={`p-3 rounded-xl border transition-all duration-300 flex flex-col gap-1.5 justify-center relative overflow-hidden text-center ${
+                                  isWinner ? 'bg-gradient-to-br from-yellow-500/20 to-amber-600/10 border-yellow-400 shadow-[0_0_15px_rgba(251,191,36,0.25)] ring-1 ring-yellow-400/40' :
+                                  'bg-emerald-950/35 border-emerald-500/30 hover:bg-emerald-950/50'
                                 }`}
                               >
-                                <div className="min-w-0 flex-1">
-                                  <p className={`text-xs md:text-sm font-extrabold truncate ${
-                                    isWinner ? 'text-yellow-250 font-black' : 'text-emerald-300'
-                                  }`}>
-                                    {p.name}
-                                  </p>
-                                </div>
-                                <div className="flex items-center justify-between gap-2 min-w-0">
-                                  <span className={`font-mono font-black text-xs md:text-sm px-2.5 py-1 rounded shrink-0 ${
-                                    isWinner ? 'bg-yellow-400 text-slate-900 shadow-sm font-bold animate-pulse' :
-                                    'bg-emerald-500/20 text-white border border-emerald-500/20'
-                                  }`}>
-                                    ID {p.id}
-                                  </span>
-                                  
-                                  <span className={`text-[10px] font-black tracking-widest uppercase px-2 py-0.5 rounded shrink-0 ${
-                                    isWinner ? 'text-yellow-400 animate-bounce bg-yellow-400/10 border border-yellow-400/20' :
-                                    'text-emerald-400 bg-emerald-500/15 font-bold border border-emerald-500/20'
-                                  }`}>
-                                    {isWinner ? '👑 WINNER' : 'STAY'}
-                                  </span>
-                                </div>
-                                <div className={`h-0.5 w-full rounded-full ${
-                                  isWinner ? 'bg-gradient-to-r from-yellow-400 to-amber-500' : 'bg-emerald-500/60'
-                                }`} />
+                                <p className={`text-sm md:text-base font-black truncate pr-0.5 ${
+                                  isWinner ? 'text-yellow-300 font-extrabold' : 'text-emerald-100'
+                                }`}>
+                                  {isWinner ? `👑 ${p.name}` : p.name}
+                                </p>
+                                <p className={`font-mono font-extrabold text-xs md:text-sm ${
+                                  isWinner ? 'text-yellow-400' : 'text-emerald-400/90'
+                                }`}>
+                                  ID {p.id}
+                                </p>
                               </motion.div>
                             );
                           })}
@@ -720,22 +697,14 @@ export default function Game1Screen({ state, setState }: Game1ScreenProps) {
                                 exit={{ opacity: 0, scale: 0.95 }}
                                 transition={{ type: "spring", stiffness: 350, damping: 25 }}
                                 key={`eliminated-${p.id}`}
-                                className="p-3 rounded-xl border border-red-900/20 bg-red-950/15 opacity-40 select-none flex flex-col justify-between gap-2 relative overflow-hidden"
+                                className="p-3 rounded-xl border border-red-900/30 bg-red-950/5 hover:bg-red-950/10 opacity-40 select-none flex flex-col gap-1.5 justify-center relative overflow-hidden text-center"
                               >
-                                <div className="min-w-0 flex-1">
-                                  <p className="text-xs md:text-sm text-stone-400 line-through truncate font-medium">
-                                    {p.name}
-                                  </p>
-                                </div>
-                                <div className="flex items-center justify-between gap-2 min-w-0">
-                                  <span className="font-mono font-black text-xs md:text-sm px-2 py-0.5 rounded shrink-0 bg-slate-800 text-stone-400 line-through border border-stone-700/20">
-                                    ID {p.id}
-                                  </span>
-                                  <span className="text-[10px] font-black tracking-widest uppercase px-2 py-0.5 rounded shrink-0 text-red-400 bg-red-500/10 border border-red-500/20">
-                                    OUT
-                                  </span>
-                                </div>
-                                <div className="h-0.5 w-full bg-red-900/20 rounded-full" />
+                                <p className="text-sm md:text-base text-stone-400 line-through truncate font-bold">
+                                  {p.name}
+                                </p>
+                                <p className="font-mono font-black text-xs md:text-sm text-stone-500 line-through">
+                                  ID {p.id}
+                                </p>
                               </motion.div>
                             ))}
                         </AnimatePresence>
