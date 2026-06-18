@@ -318,7 +318,12 @@ const Stickman = ({ player, facingRight, action }: { player: Player, facingRight
         repeat: action === 'win' ? Infinity : 0
       }}
     >
-      <span className="text-sm font-bold mb-2 bg-gray-900/80 px-2 py-1 rounded border border-gray-700">{player.id}</span>
+      <div className="flex flex-col items-center mb-2 bg-gray-900/80 px-2.5 py-1 rounded border border-gray-700 text-center select-none w-28">
+        {player.name && player.name !== player.id && (
+          <span className="text-[10px] text-gray-300 font-bold leading-none truncate w-full mb-1">{player.name}</span>
+        )}
+        <span className="text-xs font-mono font-bold text-white">ID {player.id}</span>
+      </div>
       <svg width="60" height="60" viewBox="0 0 50 50" className={facingRight ? '' : 'scale-x-[-1]'}>
         <circle cx="25" cy="10" r="6" stroke="white" strokeWidth="2.5" fill={action === 'die' ? 'red' : 'none'} />
         <line x1="25" y1="16" x2="25" y2="32" stroke="white" strokeWidth="2.5" />

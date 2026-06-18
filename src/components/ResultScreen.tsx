@@ -113,12 +113,12 @@ export default function ResultScreen({ state, setState }: ResultScreenProps) {
                     </div>
 
                     <div className="bg-black/40 w-full py-3 px-2 rounded-lg border border-white/10 text-center">
-                      <p className="text-xs text-white/40 uppercase tracking-widest mb-1 font-bold">Winner</p>
-                      <p className="text-2xl font-mono font-black text-white tracking-wider truncate w-full" title={winner.player.id}>
-                        {winner.player.id}
-                      </p>
-                      <p className="text-sm font-bold text-yellow-400 mt-1 truncate w-full" title={winner.player.name}>
+                      <p className="text-xs text-white/40 uppercase tracking-widest mb-1.5 font-bold">Winner</p>
+                      <p className="text-sm font-bold text-yellow-400 truncate w-full" title={winner.player.name}>
                         {winner.player.name}
+                      </p>
+                      <p className="text-xl font-mono font-black text-white tracking-wider truncate w-full mt-1" title={winner.player.id}>
+                        ID {winner.player.id}
                       </p>
                     </div>
                   </motion.div>
@@ -159,11 +159,12 @@ export default function ResultScreen({ state, setState }: ResultScreenProps) {
                     </div>
 
                     <div className="bg-black/60 w-full py-3 px-2 rounded-lg border border-red-500/20 text-center">
-                      <p className="text-2xl font-mono font-black text-white tracking-wider line-through truncate w-full" title={w.player.id}>
-                        {w.player.id}
-                      </p>
-                      <p className="text-sm font-bold text-red-400 mt-1 truncate w-full" title={w.player.name}>
+                      <p className="text-[10px] text-red-500/50 uppercase tracking-widest mb-1.5 font-bold">Disqualified</p>
+                      <p className="text-sm font-bold text-red-400 truncate w-full" title={w.player.name}>
                         {w.player.name}
+                      </p>
+                      <p className="text-xl font-mono font-black text-white/50 tracking-wider line-through truncate w-full mt-1" title={w.player.id}>
+                        ID {w.player.id}
                       </p>
                     </div>
                   </motion.div>

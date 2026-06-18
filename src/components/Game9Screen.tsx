@@ -37,7 +37,7 @@ const MonsterFigure = ({ size = 50 }: { size?: number }) => (
   </div>
 );
 
-const StickFigure = ({ color = "currentColor", size = 40, opacity = 1, isDead = false, id, showFullId = false, largeId = false, isWinner = false, isScrambling = false, rotate = 0 }: { color?: string, size?: number, opacity?: number, isDead?: boolean, id?: string, showFullId?: boolean, largeId?: boolean, isWinner?: boolean, isScrambling?: boolean, rotate?: number }) => {
+const StickFigure = ({ color = "currentColor", size = 40, opacity = 1, isDead = false, id, name, showFullId = false, largeId = false, isWinner = false, isScrambling = false, rotate = 0 }: { color?: string, size?: number, opacity?: number, isDead?: boolean, id?: string, name?: string, showFullId?: boolean, largeId?: boolean, isWinner?: boolean, isScrambling?: boolean, rotate?: number }) => {
   const [scrambled, setScrambled] = useState("");
   useEffect(() => {
     if (!isScrambling || !id) return;
@@ -46,27 +46,36 @@ const StickFigure = ({ color = "currentColor", size = 40, opacity = 1, isDead = 
       let r = '';
       for(let i=0; i<4; i++) r += chars.charAt(Math.floor(Math.random() * chars.length));
       setScrambled(`${r.substring(0,3)}xxx${r.substring(3)}`);
-    }, 100 + Math.random() * 100);
+    }, 100 + Math.random() * 105);
     return () => clearInterval(interval);
   }, [isScrambling, id]);
 
-  let idClasses = "absolute left-1/2 -translate-x-1/2 rounded font-mono font-bold whitespace-nowrap z-20 transition-all duration-300 ";
+  let idClasses = "absolute left-1/2 -translate-x-1/2 rounded font-mono font-bold whitespace-nowrap z-20 transition-all duration-300 text-center ";
   if (isScrambling) {
     idClasses += "-top-4 text-[6px] text-stone-500/70 bg-transparent";
   } else {
     idClasses += "border ";
-    if (largeId) idClasses += "-top-12 text-xl px-4 py-2 ";
-    else idClasses += "-top-6 text-[8px] px-2 py-0.5 ";
+    if (largeId) idClasses += "-top-[64px] text-[12px] px-2.5 py-1 ";
+    else idClasses += "-top-8 text-[8px] px-1.5 py-0.5 ";
     
     if (isWinner) idClasses += "bg-yellow-400 text-black border-yellow-500 shadow-[0_0_15px_rgba(250,204,21,0.5)]";
-    else idClasses += "bg-black/80 text-white border-white/10";
+    else idClasses += "bg-black/90 text-white border-white/10";
   }
 
   return (
     <div className="flex flex-col items-center justify-center relative" style={{ width: size, height: size * 1.5, opacity }}>
       {id && (
         <div className={idClasses}>
-          {isScrambling ? scrambled : (showFullId ? id : `${id.substring(0, 3)}xxx${id.slice(-1)}`)}
+          <div className="flex flex-col items-center">
+            {name && !isScrambling && (showFullId || isDead || isWinner) && (
+              <span className={`font-sans tracking-tight leading-none overflow-hidden text-ellipsis max-w-[120px] font-bold ${
+                largeId ? 'text-[9px] mb-0.5 text-stone-300' : 'text-[6px] mb-0.5 text-stone-400'
+              } ${isWinner ? 'text-slate-900 border-b border-slate-950/10 w-full pb-px mb-px' : ''}`}>
+                {name}
+              </span>
+            )}
+            <span className="leading-tight shrink-0">{isScrambling ? scrambled : (showFullId ? id : `${id.substring(0, 3)}xxx${id.slice(-1)}`)}</span>
+          </div>
         </div>
       )}
       <svg width={size} height={size * 1.2} viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-md" style={{ transform: `rotate(${rotate}deg)`, transition: 'transform 0.3s ease-in-out' }}>
@@ -583,7 +592,7 @@ export default function Game9Screen({ state, setState }: Game9ScreenProps) {
                         zIndex: i 
                       }}
                     >
-                      <StickFigure color="#52525b" size={35} id={p.id} isScrambling={true} />
+                      <StickFigure color="#52525b" size={35} id={p.id} name={p.name} isScrambling={true} />
                     </div>
                   ))}
                 </div>
@@ -733,6 +742,7 @@ export default function Game9Screen({ state, setState }: Game9ScreenProps) {
                       size={120} 
                       isDead={!p.isAlive} 
                       id={p.id}
+                      name={p.name}
                       largeId={true}
                       showFullId={!p.isAlive || (phase === 'winner' && p.isAlive)}
                       isWinner={phase === 'winner' && p.isAlive}

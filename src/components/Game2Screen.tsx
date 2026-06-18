@@ -362,11 +362,11 @@ export default function Game2Screen({ state, setState }: Game2ScreenProps) {
                   </p>
 
                   <div className="bg-white/5 border border-white/5 rounded-xl p-3 inline-block min-w-[200px] mb-5">
-                    <p className="text-[9px] text-white/40 uppercase tracking-widest mb-0.5 font-bold">WINNER</p>
-                    <p className="text-lg font-mono font-black text-white tracking-wider truncate leading-tight">{currentWinner.id}</p>
-                    <p className="text-sm font-bold text-yellow-400 truncate mt-0.5">
+                    <p className="text-[9px] text-white/40 uppercase tracking-widest mb-1.5 font-bold">WINNER</p>
+                    <p className="text-sm font-bold text-yellow-400 truncate">
                       {playerMap[currentWinner.id] || currentWinner.id}
                     </p>
+                    <p className="text-lg font-mono font-black text-white tracking-wider truncate mt-1 leading-tight">ID {currentWinner.id}</p>
                   </div>
 
                   <div className="flex justify-center gap-2.5">
@@ -432,13 +432,13 @@ export default function Game2Screen({ state, setState }: Game2ScreenProps) {
                       px-2 py-1 md:px-3 md:py-1.5 rounded-lg border font-mono font-bold whitespace-nowrap shadow-lg flex flex-col leading-tight
                       ${index === 0 ? 'bg-yellow-500 text-black border-yellow-400' : 'bg-black/80 text-white border-white/20'}
                     `}>
-                      <div className="flex items-center gap-1 md:gap-2">
-                        <span className={index === 0 ? 'text-black' : 'text-white/50'}>#{index + 1}</span>
-                        <span className="text-xs md:text-sm max-w-[80px] md:max-w-[120px] truncate">{racer.id}</span>
-                      </div>
-                      <span className={`text-[10px] md:text-xs truncate max-w-[80px] md:max-w-[120px] ${index === 0 ? 'text-black/70' : 'text-white/60'}`}>
+                      <span className={`text-[10px] md:text-xs font-bold truncate max-w-[80px] md:max-w-[120px] mb-0.5 ${index === 0 ? 'text-black/70' : 'text-white/60'}`}>
                         {playerMap[racer.id] || racer.id}
                       </span>
+                      <div className="flex items-center gap-1 md:gap-1.5">
+                        <span className={index === 0 ? 'text-black/60 text-[10px]' : 'text-white/40 text-[10px]'}>#{index + 1}</span>
+                        <span className="text-xs md:text-sm font-black truncate max-w-[80px] md:max-w-[120px]">{racer.id}</span>
+                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -513,11 +513,11 @@ export default function Game2Screen({ state, setState }: Game2ScreenProps) {
                   </span>
                   <span className="text-2xl md:text-3xl filter drop-shadow-md">{racer.animal}</span>
                   <div className="flex-1 min-w-0">
-                    <p className={`font-mono font-bold text-xs md:text-sm truncate ${index === 0 ? 'text-yellow-400' : 'text-white'}`}>
-                      {racer.id}
-                    </p>
-                    <p className="text-[10px] md:text-xs text-white/50 truncate">
+                    <p className={`text-[10px] md:text-xs font-bold truncate ${index === 0 ? 'text-yellow-400/80' : 'text-white/50'}`}>
                       {playerMap[racer.id] || racer.id}
+                    </p>
+                    <p className={`font-mono font-black text-xs md:text-sm truncate mt-0.5 ${index === 0 ? 'text-yellow-300' : 'text-white'}`}>
+                      ID {racer.id}
                     </p>
                     <div className="w-full bg-black/50 h-1.5 rounded-full mt-1 overflow-hidden">
                       <div 
