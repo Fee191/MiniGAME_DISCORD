@@ -686,17 +686,17 @@ export default function Game9Screen({ state, setState }: Game9ScreenProps) {
             animate={{ opacity: 1, scale: 1 }}
             className="w-full h-full bg-stone-900 flex flex-col items-center justify-center p-12 relative text-white"
           >
-            <div className="absolute top-10 left-1/2 -translate-x-1/2 text-center">
-              <div className="inline-flex items-center gap-2 bg-red-600/20 text-red-500 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.4em] border border-red-500/20 mb-4">
+            <div className="relative text-center z-10 my-4 select-none">
+              <div className="inline-flex items-center gap-2 bg-red-600/20 text-red-500 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.4em] border border-red-500/20 mb-3">
                 <Zap className="w-3 h-3" /> Execution Line - TEAM {teams.findIndex(t => t.id === activeTeamId) + 1}
               </div>
-              <h3 className="text-4xl font-black uppercase tracking-tighter italic">
+              <h3 className="text-4xl font-black uppercase tracking-tighter italic text-red-500">
                 {phase === 'winner' ? "SURVIVOR FOUND" : "ELIMINATION IN PROGRESS"}
               </h3>
             </div>
 
             {/* The Lineup and Scope Container */}
-            <div className="relative w-full max-w-6xl h-[330px] mt-16 mx-auto">
+            <div className="relative w-full max-w-6xl h-[330px] mt-24 mb-6 mx-auto">
               {/* Sniper Scope */}
               {phase === 'firing' && (
                 <motion.div 
